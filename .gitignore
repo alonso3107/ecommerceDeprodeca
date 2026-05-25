@@ -1,0 +1,12 @@
+# Dependencias
+node_modules/
+dist/
+.nuxt/
+
+# Entorno
+.env
+
+# Archivos de Go y SO
+/deprodeca-backend/tmp/
+*.exe
+.DS_Store
