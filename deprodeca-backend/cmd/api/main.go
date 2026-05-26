@@ -16,6 +16,7 @@ import (
 	"deprodeca-backend/internal/productos"
 	"deprodeca-backend/internal/usuarios"
 	"deprodeca-backend/middleware"
+	"deprodeca-backend/pkg/hash"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
@@ -41,6 +42,9 @@ func main() {
 		log.Fatalf("[DB] Ping fallido: %v", err)
 	}
 	log.Println("[DB] PostgreSQL conectado — deprodeca")
+
+	// ─── 2.5 Seed: crear admin si no existe ──────────────────
+	seedAdmin(ctx, dbPool)
 
 	// ─── 3. Conectar Redis ─────────────────────────────────
 	rdb := redis.NewClient(&redis.Options{
@@ -192,6 +196,36 @@ func main() {
 		log.Fatalf("[SERVER] Error al apagar: %v", err)
 	}
 	log.Println("[SERVER] Servidor detenido correctamente")
+}
+
+// seedAdmin crea un usuario administrador por defecto si no existe.
+func seedAdmin(ctx context.Context, db *pgxpool.Pool) {
+	var existe bool
+	err := db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM usuarios WHERE email = 'admin@deprodeca.pe')`).Scan(&existe)
+	if err != nil {
+		log.Printf("[SEED] Error al verificar admin: %v", err)
+		return
+	}
+	if existe {
+		return
+	}
+
+	passwordHash, err := hash.Hashear("admin123")
+	if err != nil {
+		log.Printf("[SEED] Error al hashear: %v", err)
+		return
+	}
+
+	_, err = db.Exec(ctx,
+		`INSERT INTO usuarios (email, password_hash, nombre, empresa, ruc, telefono, rol)
+		 VALUES ($1, $2, $3, $4, $5, $6, 'admin')`,
+		"admin@deprodeca.pe", passwordHash, "Administrador", "DEPRODECA", "00000000000", "",
+	)
+	if err != nil {
+		log.Printf("[SEED] Error al crear admin: %v", err)
+		return
+	}
+	log.Println("[SEED] Admin creado — admin@deprodeca.pe / admin123")
 }
 
 // errorHandler centralizado para Fiber.
