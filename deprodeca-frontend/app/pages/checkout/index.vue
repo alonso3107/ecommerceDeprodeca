@@ -1,3 +1,13 @@
+<!--
+  ═══════════════════════════════════════════════════════════════
+  checkout/index.vue — Checkout · DEPRODECA
+  Brutalismo aplicado al flujo de pago:
+  • Métodos de pago como bloques toggle (delegado a MetodoPagoSelector)
+  • Panel resumen con bordes duros, sin curvas
+  • Éxito con ícono geométrico (diamante + check, no círculo)
+  • Botón confirmar: bloque negro sólido masivo
+  ═══════════════════════════════════════════════════════════════
+-->
 <script setup lang="ts">
 definePageMeta({
   layout: "default",
@@ -5,12 +15,15 @@ definePageMeta({
 })
 
 const config = useRuntimeConfig()
+
+// ─── Estado ───────────────────────────────────────────────
 const carrito = ref<any[]>([])
 const metodo = ref("yape")
 const loading = ref(false)
 const pedidoCreado = ref<any>(null)
 const errorMsg = ref("")
 
+// ─── Ciclo de vida ────────────────────────────────────────
 onMounted(() => {
   if (import.meta.client) {
     carrito.value = JSON.parse(localStorage.getItem("deprodeca_carrito") || "[]")
@@ -20,35 +33,44 @@ onMounted(() => {
   }
 })
 
+// ─── Computed ─────────────────────────────────────────────
 const total = computed(() =>
   carrito.value.reduce((sum: number, item: any) => sum + item.precio * item.cantidad, 0),
 )
 
+const totalItems = computed(() =>
+  carrito.value.reduce((sum: number, item: any) => sum + item.cantidad, 0),
+)
+
+// ─── Utilidades ───────────────────────────────────────────
 function formatearPrecio(precio: number) {
-  return new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" }).format(precio)
+  return new Intl.NumberFormat("es-PE", {
+    style: "currency",
+    currency: "PEN",
+    minimumFractionDigits: 2,
+  }).format(precio)
 }
 
+// ─── Métodos de pago ──────────────────────────────────────
 const metodosPago = [
   {
     id: "yape",
     nombre: "Yape",
-    icono: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z M9 9.5V12l2 1.5L9 15v2.5 M15 9.5V12l-2 1.5 2 1.5v2.5",
     datos: "Yape: 987 654 321",
   },
   {
     id: "plin",
     nombre: "Plin",
-    icono: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z M9 10l2 2 4-4",
     datos: "Plin: 987 654 321",
   },
   {
     id: "transferencia",
     nombre: "Transferencia",
-    icono: "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z",
     datos: "BCP: 194-1234567-0-89\nCCI: 0021940123456708999\nTitular: DEPRODECA SAC",
   },
 ]
 
+// ─── Confirmar pedido ─────────────────────────────────────
 async function confirmarPedido() {
   const token = import.meta.client ? localStorage.getItem("deprodeca_token") : null
   if (!token) {
@@ -110,114 +132,195 @@ async function confirmarPedido() {
 
 <template>
   <div class="page-enter max-w-[1280px] mx-auto px-6 md:px-8 py-12">
-    <h1 class="font-display text-display-lg text-texto uppercase mb-10">Checkout</h1>
 
-    <!-- Confirmado -->
-    <div v-if="pedidoCreado" class="text-center py-20">
-      <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-exito/10 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-exito"><path d="M5 13l4 4L19 7"/></svg>
+    <!-- ═══════════════════════════════════════════════════════
+         ÉXITO · Confirmación geométrica, sin círculos
+         ═══════════════════════════════════════════════════════ -->
+    <div v-if="pedidoCreado" class="text-center py-32">
+      <!-- Ícono: Diamante geométrico con check -->
+      <svg
+        class="mx-auto mb-8 text-exito"
+        width="80" height="80" viewBox="0 0 80 80" fill="none"
+      >
+        <!-- Diamante exterior -->
+        <path d="M40 4L76 40L40 76L4 40L40 4Z" stroke="currentColor" stroke-width="2"/>
+        <!-- Diamante interior -->
+        <path d="M40 18L58 40L40 62L22 40L40 18Z" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+        <!-- Check -->
+        <path d="M30 41L37 49L52 33" stroke="currentColor" stroke-width="3"
+              stroke-linecap="square" stroke-linejoin="miter"/>
+      </svg>
+
+      <p class="font-display text-[clamp(2.5rem,6vw,4rem)] text-texto uppercase leading-[0.9] mb-4">
+        ¡Pedido<br />Confirmado<span class="text-exito">!</span>
+      </p>
+
+      <div class="flex items-center justify-center gap-3 mb-6">
+        <span class="font-mono text-[11px] text-texto-muted uppercase tracking-[0.2em]">
+          Pedido #
+        </span>
+        <span class="font-mono text-[13px] text-texto font-bold tracking-wider">
+          {{ pedidoCreado.id }}
+        </span>
       </div>
-      <h2 class="font-display text-display-md text-texto uppercase mb-2">¡Pedido Confirmado!</h2>
-      <p class="font-body text-body text-texto-muted mb-2">Pedido #{{ pedidoCreado.id }}</p>
-      <p class="font-body text-small text-texto-muted">Redirigiendo a tu pedido...</p>
+
+      <p class="font-body text-body text-texto-muted mb-4">
+        Redirigiendo a tu pedido...
+      </p>
+
+      <!-- Barra de progreso geométrica -->
+      <div class="flex justify-center gap-1">
+        <span class="w-12 h-1 bg-[#D4A017] animate-pulse" />
+        <span class="w-3 h-1 bg-borde" />
+        <span class="w-3 h-1 bg-borde" />
+      </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════
+         CHECKOUT · Layout 2 columnas
+         ═══════════════════════════════════════════════════════ -->
     <template v-else>
-      <div class="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10">
+      <!-- Encabezado -->
+      <div class="mb-12">
+        <p class="font-mono text-[11px] text-texto-muted uppercase tracking-[0.3em] mb-4">
+          ─── Checkout · {{ totalItems }} items
+        </p>
+        <h1 class="font-display text-display-lg text-texto uppercase leading-[0.95]">
+          Finalizar<br />Pedido<span class="text-[#D4A017]">.</span>
+        </h1>
+      </div>
 
-        <!-- Método de pago -->
-        <div>
-          <h2 class="font-body text-heading font-bold text-texto mb-6">Método de Pago</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-0 border border-borde">
 
-          <div class="space-y-3">
-            <button
-              v-for="m in metodosPago"
-              :key="m.id"
-              :class="[
-                'w-full flex items-center gap-4 p-5 rounded-2xl border-2 transition-all duration-300 text-left',
-                metodo === m.id
-                  ? 'border-texto bg-fondo shadow-sm'
-                  : 'border-borde hover:border-borde-hover bg-white',
-              ]"
-              @click="metodo = m.id"
-            >
-              <div :class="['w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0', metodo === m.id ? 'border-texto' : 'border-borde']">
-                <div v-if="metodo === m.id" class="w-2.5 h-2.5 rounded-full bg-texto" />
-              </div>
-              <span class="font-body text-body font-semibold text-texto">{{ m.nombre }}</span>
-            </button>
-          </div>
-
-          <!-- Datos de pago -->
-          <div v-if="metodo" class="mt-6 p-6 rounded-2xl bg-fondo border border-borde">
-            <h3 class="font-body text-small font-bold text-texto-muted uppercase tracking-wide mb-3">
-              Datos para el Pago
-            </h3>
-            <pre class="font-body text-body text-texto whitespace-pre-line leading-relaxed">{{ metodosPago.find(m => m.id === metodo)?.datos }}</pre>
-            <p class="mt-4 font-body text-caption text-texto-muted">
-              Realiza el pago por {{ metodosPago.find(m => m.id === metodo)?.nombre }} y luego confirma tu pedido.
-            </p>
-          </div>
+        <!-- ─── COLUMNA IZQUIERDA · Método de pago ─────────── -->
+        <div class="p-8 border-b lg:border-b-0 lg:border-r border-borde">
+          <MetodoPagoSelector
+            :metodos="metodosPago"
+            :metodo-activo="metodo"
+            @seleccionar="metodo = $event"
+          />
         </div>
 
-        <!-- Resumen -->
-        <div class="bg-white rounded-2xl border border-borde shadow-xs p-6 h-fit lg:sticky lg:top-[84px]">
-          <h3 class="font-body text-subheading font-bold text-texto mb-5">Resumen del Pedido</h3>
+        <!-- ─── COLUMNA DERECHA · Resumen ──────────────────── -->
+        <div class="bg-white p-8 lg:sticky lg:top-[84px] h-fit">
 
-          <div class="space-y-3 mb-6">
+          <!-- Header con ícono geométrico -->
+          <div class="flex items-center gap-3 mb-6">
+            <!-- Ícono: Cubo/paquete -->
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" class="text-[#D4A017] flex-shrink-0">
+              <rect x="3" y="5" width="14" height="13" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M3 5L10 1L17 5" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="square" stroke-linejoin="miter"/>
+              <path d="M10 1V11" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2"/>
+            </svg>
+            <h3 class="font-mono text-[11px] uppercase tracking-[0.2em] text-texto font-bold">
+              Resumen
+            </h3>
+          </div>
+
+          <!-- Lista de ítems compacta -->
+          <div class="space-y-0 border border-borde mb-6">
             <div
-              v-for="item in carrito"
+              v-for="(item, i) in carrito"
               :key="item.id"
-              class="flex items-center gap-3"
+              class="flex items-center gap-3 px-4 py-3"
+              :class="i > 0 ? 'border-t border-borde' : ''"
             >
-              <img
-                :src="item.imagen_url || 'https://images.unsplash.com/photo-1583258292688-d0213dc154b3?w=60&q=60'"
-                :alt="item.nombre"
-                class="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-              />
-              <div class="flex-1 min-w-0">
-                <p class="font-body text-small font-semibold text-texto truncate">{{ item.nombre }}</p>
-                <p class="font-body text-caption text-texto-muted">{{ item.cantidad }} x {{ formatearPrecio(item.precio) }}</p>
+              <!-- Imagen pequeña, rectangular -->
+              <div class="w-10 h-10 border border-borde bg-fondo flex-shrink-0">
+                <img
+                  :src="item.imagen_url || 'https://images.unsplash.com/photo-1583258292688-d0213dc154b3?w=60&q=60'"
+                  :alt="item.nombre"
+                  class="w-full h-full object-cover"
+                />
               </div>
-              <p class="font-body text-small font-semibold text-texto">{{ formatearPrecio(item.precio * item.cantidad) }}</p>
+              <div class="flex-1 min-w-0">
+                <p class="font-body text-small font-bold text-texto truncate">
+                  {{ item.nombre }}
+                </p>
+                <p class="font-mono text-[10px] text-texto-muted uppercase tracking-wider">
+                  {{ item.cantidad }} × {{ formatearPrecio(item.precio) }}
+                </p>
+              </div>
+              <p class="font-body text-small font-bold text-texto flex-shrink-0">
+                {{ formatearPrecio(item.precio * item.cantidad) }}
+              </p>
             </div>
           </div>
 
-          <div class="border-t border-borde pt-4 space-y-2 mb-6">
+          <!-- Totales -->
+          <div class="space-y-3 mb-2">
             <div class="flex justify-between font-body text-small text-texto-muted">
-              <span>Subtotal</span>
+              <span>Subtotal ({{ totalItems }} items)</span>
               <span>{{ formatearPrecio(total) }}</span>
             </div>
             <div class="flex justify-between font-body text-small text-texto-muted">
-              <span>Envío</span>
-              <span class="text-exito font-semibold">Gratis</span>
+              <span class="flex items-center gap-1.5">
+                Envío
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="none" class="text-exito">
+                  <rect x="1" y="2" width="9" height="5" stroke="currentColor" stroke-width="1.2"/>
+                  <rect x="10" y="1" width="3" height="7" stroke="currentColor" stroke-width="1.2"/>
+                  <circle cx="3.5" cy="8" r="1" stroke="currentColor" stroke-width="1"/>
+                  <circle cx="8.5" cy="8" r="1" stroke="currentColor" stroke-width="1"/>
+                </svg>
+              </span>
+              <span class="font-mono text-[11px] text-exito uppercase tracking-[0.15em] font-bold">
+                Gratis
+              </span>
             </div>
           </div>
 
-          <div class="border-t border-borde pt-4 mb-6">
-            <div class="flex justify-between items-baseline">
-              <span class="font-body text-body font-bold text-texto">Total</span>
-              <span class="font-display text-display-md text-texto">{{ formatearPrecio(total) }}</span>
-            </div>
+          <!-- Separador bold -->
+          <div class="border-t-2 border-texto my-6" />
+
+          <!-- Total masivo -->
+          <div class="flex justify-between items-baseline mb-8">
+            <span class="font-mono text-[11px] uppercase tracking-[0.2em] text-texto font-bold">
+              Total
+            </span>
+            <span class="font-display text-[clamp(1.75rem,3vw,2.25rem)] text-texto leading-none">
+              {{ formatearPrecio(total) }}
+            </span>
           </div>
 
-          <p v-if="errorMsg" class="text-small text-error font-medium mb-4 text-center" role="alert">
+          <!-- Error -->
+          <p
+            v-if="errorMsg"
+            class="font-mono text-[11px] text-error uppercase tracking-[0.1em] mb-4 text-center font-bold"
+            role="alert"
+          >
             {{ errorMsg }}
           </p>
 
-          <Button
-            variant="primary"
-            size="lg"
-            :full-width="true"
-            :loading="loading"
+          <!-- Botón CONFIRMAR · Negro masivo -->
+          <button
+            class="w-full bg-texto text-white font-display text-heading uppercase tracking-[0.05em]
+                   py-5 hover:bg-[#D4A017] hover:text-black
+                   transition-colors duration-200 min-h-[60px]
+                   disabled:opacity-40 disabled:cursor-not-allowed
+                   flex items-center justify-center gap-3 group"
+            :disabled="loading"
             @click="confirmarPedido"
           >
-            Confirmar Pedido — {{ formatearPrecio(total) }}
-          </Button>
+            <span v-if="loading" class="w-5 h-5 border-2 border-white border-t-transparent animate-spin" />
+            <template v-else>
+              Confirmar Pedido
+              <!-- Ícono: Flecha diagonal bold (checkout) -->
+              <svg
+                width="18" height="18" viewBox="0 0 18 18" fill="none"
+                class="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              >
+                <path d="M3 15L15 3M15 3H7M15 3V11" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="square" stroke-linejoin="miter"/>
+              </svg>
+            </template>
+          </button>
 
-          <p class="mt-3 text-center font-body text-caption text-texto-muted">
-            Al confirmar aceptas nuestros términos y condiciones.
+          <!-- Disclaimer -->
+          <p class="mt-5 font-mono text-[10px] text-texto-muted text-center uppercase tracking-[0.1em]">
+            Al confirmar aceptas los términos y condiciones
           </p>
+
         </div>
       </div>
     </template>
