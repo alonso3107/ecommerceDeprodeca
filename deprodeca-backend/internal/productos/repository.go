@@ -15,6 +15,9 @@ type Repository interface {
 	BuscarProductos(ctx context.Context, query string, pagina, limite int) ([]Producto, error)
 	ListarCategorias(ctx context.Context) ([]Categoria, error)
 	ObtenerCategoriaPorSlug(ctx context.Context, slug string) (Categoria, error)
+	CrearProducto(ctx context.Context, input CrearProductoInput) (Producto, error)
+	ActualizarProducto(ctx context.Context, id int64, input CrearProductoInput) (Producto, error)
+	EliminarProducto(ctx context.Context, id int64) error
 }
 
 type repositoryPG struct {
@@ -128,4 +131,41 @@ func (r *repositoryPG) ObtenerCategoriaPorSlug(ctx context.Context, slug string)
 	).Scan(&c.ID, &c.Nombre, &c.Slug, &c.Descripcion, &c.ImagenURL, &c.Activo)
 
 	return c, err
+}
+
+func (r *repositoryPG) CrearProducto(ctx context.Context, input CrearProductoInput) (Producto, error) {
+	var pr Producto
+	err := r.db.QueryRow(ctx,
+		`INSERT INTO productos (categoria_id, nombre, slug, descripcion, precio, stock, unidad, imagen_url)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		 RETURNING id, categoria_id, nombre, slug, descripcion, precio, stock, unidad, imagen_url, activo, created_at, updated_at`,
+		input.CategoriaID, input.Nombre, generarSlug(input.Nombre), input.Descripcion,
+		input.Precio, input.Stock, input.Unidad, input.ImagenURL,
+	).Scan(&pr.ID, &pr.CategoriaID, &pr.Nombre, &pr.Slug, &pr.Descripcion,
+		&pr.Precio, &pr.Stock, &pr.Unidad, &pr.ImagenURL, &pr.Activo, &pr.CreatedAt, &pr.UpdatedAt)
+	return pr, err
+}
+
+func (r *repositoryPG) ActualizarProducto(ctx context.Context, id int64, input CrearProductoInput) (Producto, error) {
+	var pr Producto
+	err := r.db.QueryRow(ctx,
+		`UPDATE productos SET nombre=$1, slug=$2, categoria_id=$3, precio=$4, stock=$5, unidad=$6, descripcion=$7, imagen_url=$8, updated_at=NOW()
+		 WHERE id=$9
+		 RETURNING id, categoria_id, nombre, slug, descripcion, precio, stock, unidad, imagen_url, activo, created_at, updated_at`,
+		input.Nombre, generarSlug(input.Nombre), input.CategoriaID, input.Precio, input.Stock,
+		input.Unidad, input.Descripcion, input.ImagenURL, id,
+	).Scan(&pr.ID, &pr.CategoriaID, &pr.Nombre, &pr.Slug, &pr.Descripcion,
+		&pr.Precio, &pr.Stock, &pr.Unidad, &pr.ImagenURL, &pr.Activo, &pr.CreatedAt, &pr.UpdatedAt)
+	return pr, err
+}
+
+func (r *repositoryPG) EliminarProducto(ctx context.Context, id int64) error {
+	_, err := r.db.Exec(ctx, `DELETE FROM productos WHERE id = $1`, id)
+	return err
+}
+
+func generarSlug(nombre string) string {
+	slug := strings.ToLower(nombre)
+	slug = strings.ReplaceAll(slug, " ", "-")
+	return slug
 }

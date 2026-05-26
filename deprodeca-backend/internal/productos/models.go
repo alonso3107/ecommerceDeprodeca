@@ -32,8 +32,19 @@ type Categoria struct {
 
 // ListarParams define parámetros de paginación y filtro.
 type ListarParams struct {
-	Pagina     int
-	Limite     int
-	Busqueda   string
+	Pagina      int
+	Limite      int
+	Busqueda    string
 	CategoriaID int64
+}
+
+// CrearProductoInput son los datos para crear/actualizar un producto.
+type CrearProductoInput struct {
+	Nombre      string  `json:"nombre"`
+	CategoriaID int64   `json:"categoria_id"`
+	Precio      float64 `json:"precio"`
+	Stock       int     `json:"stock"`
+	Unidad      string  `json:"unidad"`
+	Descripcion string  `json:"descripcion"`
+	ImagenURL   string  `json:"imagen_url"`
 }

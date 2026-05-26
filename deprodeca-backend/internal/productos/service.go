@@ -54,3 +54,18 @@ func (s *Service) ListarCategorias(ctx context.Context) ([]Categoria, error) {
 func (s *Service) ObtenerCategoriaPorSlug(ctx context.Context, slug string) (Categoria, error) {
 	return s.repo.ObtenerCategoriaPorSlug(ctx, slug)
 }
+
+// CrearProducto crea un nuevo producto (solo admin).
+func (s *Service) CrearProducto(ctx context.Context, input CrearProductoInput) (Producto, error) {
+	return s.repo.CrearProducto(ctx, input)
+}
+
+// ActualizarProducto actualiza un producto existente (solo admin).
+func (s *Service) ActualizarProducto(ctx context.Context, id int64, input CrearProductoInput) (Producto, error) {
+	return s.repo.ActualizarProducto(ctx, id, input)
+}
+
+// EliminarProducto elimina un producto (solo admin).
+func (s *Service) EliminarProducto(ctx context.Context, id int64) error {
+	return s.repo.EliminarProducto(ctx, id)
+}

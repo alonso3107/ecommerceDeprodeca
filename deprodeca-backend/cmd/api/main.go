@@ -159,6 +159,12 @@ func main() {
 	adminPagosList := api.Group("/admin/pagos", middleware.JWTAuth(cfg.JWT.Secret), middleware.RequireRol("admin"))
 	adminPagosList.Get("/", pagosHandler.ListarTodos)
 
+	// Admin: CRUD de productos
+	adminProductos := api.Group("/admin/productos", middleware.JWTAuth(cfg.JWT.Secret), middleware.RequireRol("admin"))
+	adminProductos.Post("/", productosHandler.Crear)
+	adminProductos.Put("/:id", productosHandler.Actualizar)
+	adminProductos.Delete("/:id", productosHandler.Eliminar)
+
 	// ── Gamificación (protegido) ───────────────────────────
 	gamificacionGroup := api.Group("/gamificacion", middleware.JWTAuth(cfg.JWT.Secret))
 	gamificacionGroup.Get("/rango", gamificacionHandler.ObtenerRango)
