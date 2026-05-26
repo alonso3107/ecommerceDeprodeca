@@ -51,6 +51,8 @@ function formatearPrecio(precio: number) {
   }).format(precio)
 }
 
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23FAFAFA' width='400' height='300'/%3E%3Ctext x='200' y='155' text-anchor='middle' font-size='14' font-family='monospace' fill='%23A3A3A3'%3EDEPRODECA%3C/text%3E%3C/svg%3E"
+
 // ─── Métodos de pago ──────────────────────────────────────
 const metodosPago = [
   {
@@ -232,7 +234,8 @@ async function confirmarPedido() {
                   :src="item.imagen_url || 'https://images.unsplash.com/photo-1583258292688-d0213dc154b3?w=60&q=60'"
                   :alt="item.nombre"
                   class="w-full h-full object-cover"
-                />
+                                      @error="(e: Event) => (e.target as HTMLImageElement).src = PLACEHOLDER"
+                                      />
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-body text-small font-bold text-texto truncate">

@@ -48,6 +48,8 @@ function formatearPrecio(precio: number) {
   }).format(precio)
 }
 
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Crect fill='%23FAFAFA' width='600' height='600'/%3E%3Ctext x='300' y='310' text-anchor='middle' font-size='20' font-family='monospace' fill='%23A3A3A3'%3EDEPRODECA%3C/text%3E%3C/svg%3E"
+
 // ─── Carrito ──────────────────────────────────────────────
 function agregarAlCarrito() {
   if (!producto.value) return
@@ -126,6 +128,7 @@ function agregarAlCarrito() {
             :src="producto.imagen_url || 'https://images.unsplash.com/photo-1553530979-3f62c23fb101?w=600&q=80'"
             :alt="producto.nombre"
             class="w-full h-full object-cover"
+            @error="(e: Event) => (e.target as HTMLImageElement).src = PLACEHOLDER"
           />
 
           <!-- Badge AGOTADO · overlay brutalista -->

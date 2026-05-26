@@ -39,6 +39,8 @@ function formatearPrecio(p: number) {
   }).format(p)
 }
 
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23FAFAFA' width='400' height='300'/%3E%3Ctext x='200' y='155' text-anchor='middle' font-size='14' font-family='monospace' fill='%23A3A3A3'%3EDEPRODECA%3C/text%3E%3C/svg%3E"
+
 function formatearFecha(f: string) {
   return new Date(f).toLocaleDateString("es-PE", {
     day: "numeric", month: "long", year: "numeric",
@@ -185,6 +187,7 @@ const estadoConfig: Record<string, { label: string; color: string }> = {
               :src="det.imagen_url || 'https://images.unsplash.com/photo-1583258292688-d0213dc154b3?w=60&q=60'"
               :alt="det.producto_nombre"
               class="w-full h-full object-cover"
+            @error="(e: Event) => (e.target as HTMLImageElement).src = PLACEHOLDER"
             />
           </div>
 

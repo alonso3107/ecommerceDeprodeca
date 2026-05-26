@@ -18,6 +18,8 @@ defineProps<{
 }>()
 
 // ─── Utilidades ───────────────────────────────────────────
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23FAFAFA' width='400' height='300'/%3E%3Ctext x='200' y='155' text-anchor='middle' font-size='14' font-family='monospace' fill='%23A3A3A3'%3EDEPRODECA%3C/text%3E%3C/svg%3E"
+
 function formatearPrecio(precio: number): string {
   return new Intl.NumberFormat("es-PE", {
     style: "currency",
@@ -52,6 +54,7 @@ function formatearPrecio(precio: number): string {
         :alt="`Producto: ${nombre}`"
         class="w-full h-full object-cover"
         loading="lazy"
+        @error="(e: Event) => (e.target as HTMLImageElement).src = PLACEHOLDER"
       />
 
       <!-- Overlay AGOTADO · Brutalista: franja negra con texto blanco -->
