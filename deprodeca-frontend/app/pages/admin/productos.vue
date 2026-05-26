@@ -25,6 +25,59 @@ const form = ref({ nombre: "", categoria_id: 0, precio: 0, stock: 0, unidad: "",
 const toastMsg = ref("")
 const toastType = ref<"success" | "error">("success")
 const showToast = ref(false)
+const errorForm = ref("")
+
+// ─── Validaciones en tiempo real ──────────────────────
+const errores = computed(() => {
+  const e: Record<string, string | null> = {
+    nombre: null, categoria_id: null, precio: null, stock: null,
+  }
+  const f = form.value
+
+  if (f.nombre && f.nombre.trim().length < 3)
+    e.nombre = "Minimo 3 caracteres"
+
+  if (f.precio !== null && f.precio !== undefined && Number(f.precio) <= 0)
+    e.precio = "Debe ser mayor a 0"
+
+  if (f.stock !== null && f.stock !== undefined && Number(f.stock) < 0)
+    e.stock = "No puede ser negativo"
+
+  return e
+})
+
+function campoEstado(campo: string): boolean | null {
+  const val = (form.value as any)[campo]
+  if (campo === 'categoria_id') return val > 0 ? true : null
+  if (val === null || val === undefined || val === '') return null
+  if (campo === 'precio' || campo === 'stock') {
+    if (Number(val) === 0 && campo === 'precio') return null
+    if (Number(val) === 0 && campo === 'stock') return true
+  }
+  return errores.value[campo] === null
+}
+
+function validarForm(): boolean {
+  errorForm.value = ""
+  const f = form.value
+  if (!f.nombre || f.nombre.trim().length < 3) {
+    errorForm.value = "El nombre debe tener al menos 3 caracteres"
+    return false
+  }
+  if (!f.categoria_id || f.categoria_id <= 0) {
+    errorForm.value = "Selecciona una categoria"
+    return false
+  }
+  if (!f.precio || Number(f.precio) <= 0) {
+    errorForm.value = "El precio debe ser mayor a 0"
+    return false
+  }
+  if (f.stock === null || f.stock === undefined || Number(f.stock) < 0) {
+    errorForm.value = "El stock no puede ser negativo"
+    return false
+  }
+  return true
+}
 
 function getToken() {
   return import.meta.client ? localStorage.getItem("deprodeca_token") : null
@@ -88,6 +141,10 @@ function cerrarModal() {
 }
 
 async function guardarProducto() {
+  if (!validarForm()) {
+    mostrarToast(errorForm.value, "error")
+    return
+  }
   saving.value = true
   const token = getToken()
   try {
@@ -389,29 +446,38 @@ watch([busqueda, categoriaFiltro], () => {
             </div>
 
             <!-- Formulario -->
-            <form class="p-6 space-y-5" @submit.prevent="guardarProducto">
+            <form class="p-6 space-y-5" @submit.prevent="guardarProducto" novalidate>
+              <!-- Error global -->
+              <p v-if="errorForm" class="font-mono text-xs text-error uppercase tracking-[0.1em] font-bold border border-error px-3 py-2 text-center">
+                {{ errorForm }}
+              </p>
+
               <!-- Nombre -->
               <div>
-                <label class="block font-mono text-xs text-texto-muted uppercase tracking-[0.12em] mb-2">Nombre *</label>
+                <label class="flex justify-between items-baseline mb-2" for="prod-nombre">
+                  <span class="font-mono text-xs text-texto-muted uppercase tracking-[0.12em]">Nombre *</span>
+                  <span v-if="campoEstado('nombre') === false" class="font-mono text-xs text-error">{{ errores.nombre }}</span>
+                  <span v-else-if="campoEstado('nombre') === true" class="font-mono text-xs text-exito">OK</span>
+                </label>
                 <input
+                  id="prod-nombre"
                   v-model="form.nombre"
-                  required
-                  class="w-full border border-borde px-4 py-3 font-body text-sm text-texto
-                         bg-white placeholder:text-texto-muted
-                         focus:border-[#D4A017] focus:outline-none transition-colors min-h-[48px]"
+                  required minlength="3"
+                  :class="['w-full border px-4 py-3 font-body text-sm text-texto bg-white placeholder:text-texto-muted focus:outline-none transition-colors min-h-[48px]', campoEstado('nombre') === false ? 'border-error focus:border-error' : 'border-borde focus:border-[#D4A017]']"
                   placeholder="Ej: Milo 400g"
                 />
               </div>
 
               <!-- Categoria -->
               <div>
-                <label class="block font-mono text-xs text-texto-muted uppercase tracking-[0.12em] mb-2">Categoria *</label>
+                <label class="flex justify-between items-baseline mb-2" for="prod-cat">
+                  <span class="font-mono text-xs text-texto-muted uppercase tracking-[0.12em]">Categoria *</span>
+                </label>
                 <select
+                  id="prod-cat"
                   v-model="form.categoria_id"
                   required
-                  class="w-full border border-borde px-4 py-3 font-mono text-xs uppercase tracking-[0.1em]
-                         text-texto bg-white focus:border-[#D4A017] focus:outline-none
-                         transition-colors min-h-[48px] cursor-pointer"
+                  :class="['w-full border px-4 py-3 font-mono text-xs uppercase tracking-[0.1em] text-texto bg-white focus:outline-none transition-colors min-h-[48px] cursor-pointer', form.categoria_id <= 0 ? 'border-borde focus:border-[#D4A017]' : 'border-borde focus:border-[#D4A017]']"
                 >
                   <option :value="0" disabled>Seleccionar categoria</option>
                   <option v-for="cat in categorias" :key="cat.id" :value="cat.id">
@@ -423,24 +489,30 @@ watch([busqueda, categoriaFiltro], () => {
               <!-- Precio + Stock -->
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block font-mono text-xs text-texto-muted uppercase tracking-[0.12em] mb-2">Precio (S/) *</label>
+                  <label class="flex justify-between items-baseline mb-2" for="prod-precio">
+                    <span class="font-mono text-xs text-texto-muted uppercase tracking-[0.12em]">Precio (S/) *</span>
+                    <span v-if="campoEstado('precio') === false" class="font-mono text-xs text-error">{{ errores.precio }}</span>
+                    <span v-else-if="campoEstado('precio') === true" class="font-mono text-xs text-exito">OK</span>
+                  </label>
                   <input
+                    id="prod-precio"
                     v-model.number="form.precio"
-                    type="number" step="0.01" min="0" required
-                    class="w-full border border-borde px-4 py-3 font-mono text-sm text-texto
-                           bg-white placeholder:text-texto-muted
-                           focus:border-[#D4A017] focus:outline-none transition-colors min-h-[48px]"
+                    type="number" step="0.01" min="0.01" required
+                    :class="['w-full border px-4 py-3 font-mono text-sm text-texto bg-white placeholder:text-texto-muted focus:outline-none transition-colors min-h-[48px]', campoEstado('precio') === false ? 'border-error focus:border-error' : 'border-borde focus:border-[#D4A017]']"
                     placeholder="12.50"
                   />
                 </div>
                 <div>
-                  <label class="block font-mono text-xs text-texto-muted uppercase tracking-[0.12em] mb-2">Stock *</label>
+                  <label class="flex justify-between items-baseline mb-2" for="prod-stock">
+                    <span class="font-mono text-xs text-texto-muted uppercase tracking-[0.12em]">Stock *</span>
+                    <span v-if="campoEstado('stock') === false" class="font-mono text-xs text-error">{{ errores.stock }}</span>
+                    <span v-else-if="campoEstado('stock') === true" class="font-mono text-xs text-exito">OK</span>
+                  </label>
                   <input
+                    id="prod-stock"
                     v-model.number="form.stock"
                     type="number" min="0" required
-                    class="w-full border border-borde px-4 py-3 font-mono text-sm text-texto
-                           bg-white placeholder:text-texto-muted
-                           focus:border-[#D4A017] focus:outline-none transition-colors min-h-[48px]"
+                    :class="['w-full border px-4 py-3 font-mono text-sm text-texto bg-white placeholder:text-texto-muted focus:outline-none transition-colors min-h-[48px]', campoEstado('stock') === false ? 'border-error focus:border-error' : 'border-borde focus:border-[#D4A017]']"
                     placeholder="100"
                   />
                 </div>
