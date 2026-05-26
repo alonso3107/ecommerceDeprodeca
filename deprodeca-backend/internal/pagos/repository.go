@@ -13,6 +13,7 @@ type Repository interface {
 	ObtenerPorPedido(ctx context.Context, pedidoID int64) (Pago, error)
 	ActualizarEstado(ctx context.Context, id int64, estado string) error
 	ListarPorUsuario(ctx context.Context, usuarioID int64, pagina, limite int) ([]Pago, error)
+	ListarTodos(ctx context.Context, pagina, limite int) ([]Pago, error)
 }
 
 type repositoryPG struct {
@@ -71,6 +72,30 @@ func (r *repositoryPG) ListarPorUsuario(ctx context.Context, usuarioID int64, pa
 		 ORDER BY pa.created_at DESC
 		 LIMIT $2 OFFSET $3`,
 		usuarioID, limite, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var pagos []Pago
+	for rows.Next() {
+		var p Pago
+		if err := rows.Scan(&p.ID, &p.PedidoID, &p.Monto, &p.Metodo, &p.Estado, &p.ComprobanteURL, &p.CreatedAt); err != nil {
+			return nil, err
+		}
+		pagos = append(pagos, p)
+	}
+
+	return pagos, nil
+}
+
+func (r *repositoryPG) ListarTodos(ctx context.Context, pagina, limite int) ([]Pago, error) {
+	offset := (pagina - 1) * limite
+
+	rows, err := r.db.Query(ctx,
+		`SELECT id, pedido_id, monto, metodo, estado, comprobante_url, created_at
+		 FROM pagos ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+		limite, offset)
 	if err != nil {
 		return nil, err
 	}

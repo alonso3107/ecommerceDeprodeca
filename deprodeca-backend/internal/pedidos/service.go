@@ -3,6 +3,9 @@ package pedidos
 import (
 	"context"
 	"errors"
+	"fmt"
+
+	"deprodeca-backend/internal/gamificacion"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -102,4 +105,67 @@ func (s *Service) ListarMisPedidos(ctx context.Context, usuarioID int64, pagina,
 	}
 
 	return s.repo.ListarPedidosPorUsuario(ctx, usuarioID, pagina, limite)
+}
+
+// ListarTodosPedidos lista todos los pedidos (solo admin).
+func (s *Service) ListarTodosPedidos(ctx context.Context, pagina, limite int) ([]Pedido, error) {
+	if pagina < 1 {
+		pagina = 1
+	}
+	if limite < 1 || limite > 100 {
+		limite = 50
+	}
+	return s.repo.ListarTodos(ctx, pagina, limite)
+}
+
+// ActualizarEstado cambia el estado de un pedido (solo admin).
+func (s *Service) ActualizarEstado(ctx context.Context, pedidoID int64, estado string) error {
+	estadosValidos := map[string]bool{
+		"pendiente": true, "confirmado": true, "enviado": true,
+		"entregado": true, "cancelado": true,
+	}
+	if !estadosValidos[estado] {
+		return fmt.Errorf("estado inválido: %s", estado)
+	}
+
+	return s.repo.ActualizarEstado(ctx, pedidoID, estado)
+}
+
+// EnviarPedido marca un pedido como "enviado" (solo admin).
+func (s *Service) EnviarPedido(ctx context.Context, pedidoID int64) (Pedido, error) {
+	pedido, err := s.ObtenerPedido(ctx, pedidoID)
+	if err != nil {
+		return Pedido{}, err
+	}
+	if pedido.Estado != "confirmado" {
+		return Pedido{}, fmt.Errorf("solo pedidos confirmados pueden enviarse (estado actual: %s)", pedido.Estado)
+	}
+
+	if err := s.repo.ActualizarEstado(ctx, pedidoID, "enviado"); err != nil {
+		return Pedido{}, err
+	}
+
+	return s.ObtenerPedido(ctx, pedidoID)
+}
+
+// EntregarPedido marca un pedido como "entregado" y dispara la gamificación (solo admin).
+func (s *Service) EntregarPedido(ctx context.Context, pedidoID int64, gs *gamificacion.Service) (Pedido, error) {
+	pedido, err := s.ObtenerPedido(ctx, pedidoID)
+	if err != nil {
+		return Pedido{}, err
+	}
+	if pedido.Estado != "enviado" {
+		return Pedido{}, fmt.Errorf("solo pedidos enviados pueden entregarse (estado actual: %s)", pedido.Estado)
+	}
+
+	if err := s.repo.ActualizarEstado(ctx, pedidoID, "entregado"); err != nil {
+		return Pedido{}, err
+	}
+
+	// ─── Gamificación: acumular puntos al entregar ───
+	if _, _, err := gs.AcumularPuntos(ctx, pedido.UsuarioID, pedido.Total); err != nil {
+		return Pedido{}, fmt.Errorf("pedido entregado pero error al acumular puntos: %w", err)
+	}
+
+	return s.ObtenerPedido(ctx, pedidoID)
 }

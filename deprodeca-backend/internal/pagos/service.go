@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"deprodeca-backend/internal/gamificacion"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -47,10 +45,10 @@ func (s *Service) RegistrarPago(ctx context.Context, input RegistrarPagoInput) (
 	return s.repo.Crear(ctx, input)
 }
 
-// VerificarPago confirma el pago y dispara la gamificación.
+// VerificarPago confirma el pago y actualiza el pedido a "confirmado".
 // Solo el admin puede llamar a este método.
-// Actualiza: pago → "verificado", pedido → "confirmado", acumula puntos de gamificación.
-func (s *Service) VerificarPago(ctx context.Context, pagoID int64, gs *gamificacion.Service) (Pago, error) {
+// La gamificación (puntos/rango) se dispara al ENTREGAR el pedido, no al pagar.
+func (s *Service) VerificarPago(ctx context.Context, pagoID int64) (Pago, error) {
 	// 1. Obtener el pago
 	pago, err := s.repo.ObtenerPorID(ctx, pagoID)
 	if err != nil {
@@ -74,19 +72,6 @@ func (s *Service) VerificarPago(ctx context.Context, pagoID int64, gs *gamificac
 		return Pago{}, fmt.Errorf("error al confirmar pedido: %w", err)
 	}
 
-	// 4. Obtener usuario_id del pedido
-	var usuarioID int64
-	if err := s.db.QueryRow(ctx,
-		`SELECT usuario_id FROM pedidos WHERE id = $1`, pago.PedidoID,
-	).Scan(&usuarioID); err != nil {
-		return Pago{}, fmt.Errorf("error al obtener dueño del pedido: %w", err)
-	}
-
-	// 5. Acumular puntos de gamificación
-	if _, _, err := gs.AcumularPuntos(ctx, usuarioID, pago.Monto); err != nil {
-		return Pago{}, fmt.Errorf("error al acumular puntos: %w", err)
-	}
-
 	pago.Estado = "verificado"
 	return pago, nil
 }
@@ -101,4 +86,15 @@ func (s *Service) ListarMisPagos(ctx context.Context, usuarioID int64, pagina, l
 	}
 
 	return s.repo.ListarPorUsuario(ctx, usuarioID, pagina, limite)
+}
+
+// ListarTodosPagos lista todos los pagos (solo admin).
+func (s *Service) ListarTodosPagos(ctx context.Context, pagina, limite int) ([]Pago, error) {
+	if pagina < 1 {
+		pagina = 1
+	}
+	if limite < 1 || limite > 100 {
+		limite = 50
+	}
+	return s.repo.ListarTodos(ctx, pagina, limite)
 }

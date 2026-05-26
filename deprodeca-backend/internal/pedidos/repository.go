@@ -14,6 +14,8 @@ type Repository interface {
 	ObtenerPedidoPorID(ctx context.Context, id int64) (Pedido, error)
 	ListarDetallesPorPedido(ctx context.Context, pedidoID int64) ([]PedidoDetalle, error)
 	ListarPedidosPorUsuario(ctx context.Context, usuarioID int64, pagina, limite int) ([]Pedido, error)
+	ListarTodos(ctx context.Context, pagina, limite int) ([]Pedido, error)
+	ActualizarEstado(ctx context.Context, pedidoID int64, estado string) error
 }
 
 type repositoryPG struct {
@@ -92,6 +94,47 @@ func (r *repositoryPG) ListarPedidosPorUsuario(ctx context.Context, usuarioID in
 	for rows.Next() {
 		var p Pedido
 		if err := rows.Scan(&p.ID, &p.UsuarioID, &p.Total, &p.Estado, &p.CreatedAt, &p.UpdatedAt); err != nil {
+			return nil, err
+		}
+		pedidos = append(pedidos, p)
+	}
+
+	return pedidos, nil
+}
+
+func (r *repositoryPG) ActualizarEstado(ctx context.Context, pedidoID int64, estado string) error {
+	tag, err := r.db.Exec(ctx,
+		`UPDATE pedidos SET estado = $1, updated_at = NOW() WHERE id = $2`,
+		estado, pedidoID)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("pedido no encontrado: %d", pedidoID)
+	}
+	return nil
+}
+
+func (r *repositoryPG) ListarTodos(ctx context.Context, pagina, limite int) ([]Pedido, error) {
+	offset := (pagina - 1) * limite
+
+	rows, err := r.db.Query(ctx,
+		`SELECT p.id, p.usuario_id, p.total, p.estado, p.created_at, p.updated_at,
+		        u.nombre AS usuario_nombre, u.email AS usuario_email
+		 FROM pedidos p
+		 JOIN usuarios u ON u.id = p.usuario_id
+		 ORDER BY p.created_at DESC LIMIT $1 OFFSET $2`,
+		limite, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var pedidos []Pedido
+	for rows.Next() {
+		var p Pedido
+		if err := rows.Scan(&p.ID, &p.UsuarioID, &p.Total, &p.Estado,
+			&p.CreatedAt, &p.UpdatedAt, &p.UsuarioNombre, &p.UsuarioEmail); err != nil {
 			return nil, err
 		}
 		pedidos = append(pedidos, p)

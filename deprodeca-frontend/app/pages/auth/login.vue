@@ -45,6 +45,7 @@ async function handleLogin() {
           id: res.data.usuario_id, email: res.data.email,
           nombre: res.data.nombre, rol: res.data.rol,
         }))
+        window.dispatchEvent(new Event("auth-cambiado"))
       }
       await navigateTo("/")
     }

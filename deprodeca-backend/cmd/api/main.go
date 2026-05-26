@@ -85,21 +85,21 @@ func main() {
 	productosService := productos.NewService(productosRepo)
 	productosHandler := productos.NewHandler(productosService)
 
-	// Pedidos
-	pedidosRepo := pedidos.NewRepository(dbPool)
-	pedidosService := pedidos.NewService(pedidosRepo, dbPool)
-	pedidosHandler := pedidos.NewHandler(pedidosService)
-
 	// Gamificación
 	gamificacionRepo := gamificacion.NewRepository(dbPool)
 	gamificacionService := gamificacion.NewService(gamificacionRepo)
 	gamificacionWSHub := gamificacion.NewHubWebSocket(gamificacionService, cfg.JWT.Secret)
 	gamificacionHandler := gamificacion.NewHandler(gamificacionService, gamificacionWSHub)
 
+	// Pedidos
+	pedidosRepo := pedidos.NewRepository(dbPool)
+	pedidosService := pedidos.NewService(pedidosRepo, dbPool)
+	pedidosHandler := pedidos.NewHandler(pedidosService, gamificacionService)
+
 	// Pagos
 	pagosRepo := pagos.NewRepository(dbPool)
 	pagosService := pagos.NewService(pagosRepo, dbPool)
-	pagosHandler := pagos.NewHandler(pagosService, gamificacionService)
+	pagosHandler := pagos.NewHandler(pagosService)
 
 	// ─── 7. Rutas ──────────────────────────────────────────
 	api := app.Group("/api/v1")
@@ -145,9 +145,19 @@ func main() {
 	pagosGroup.Post("/", pagosHandler.RegistrarPago)
 	pagosGroup.Get("/", pagosHandler.ListarMisPagos)
 
-	// Admin: verificar pago → dispara gamificación
+	// Admin: verificar pago → confirma pedido
 	adminPagos := api.Group("/pagos", middleware.JWTAuth(cfg.JWT.Secret), middleware.RequireRol("admin"))
 	adminPagos.Put("/:id/verificar", pagosHandler.VerificarPago)
+
+	// Admin: gestionar estados de pedidos (enviar / entregar)
+	adminPedidos := api.Group("/admin/pedidos", middleware.JWTAuth(cfg.JWT.Secret), middleware.RequireRol("admin"))
+	adminPedidos.Get("/", pedidosHandler.ListarTodos)
+	adminPedidos.Put("/:id/enviar", pedidosHandler.Enviar)
+	adminPedidos.Put("/:id/entregar", pedidosHandler.Entregar)
+
+	// Admin: listar todos los pagos
+	adminPagosList := api.Group("/admin/pagos", middleware.JWTAuth(cfg.JWT.Secret), middleware.RequireRol("admin"))
+	adminPagosList.Get("/", pagosHandler.ListarTodos)
 
 	// ── Gamificación (protegido) ───────────────────────────
 	gamificacionGroup := api.Group("/gamificacion", middleware.JWTAuth(cfg.JWT.Secret))

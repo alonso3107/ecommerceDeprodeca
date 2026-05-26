@@ -3,7 +3,6 @@ package pagos
 import (
 	"strconv"
 
-	"deprodeca-backend/internal/gamificacion"
 	"deprodeca-backend/pkg/response"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,12 +10,11 @@ import (
 
 // Handler maneja las peticiones HTTP de pagos.
 type Handler struct {
-	service          *Service
-	gamificacionSvc  *gamificacion.Service
+	service *Service
 }
 
-func NewHandler(service *Service, gamificacionSvc *gamificacion.Service) *Handler {
-	return &Handler{service: service, gamificacionSvc: gamificacionSvc}
+func NewHandler(service *Service) *Handler {
+	return &Handler{service: service}
 }
 
 // RegistrarPago maneja POST /api/v1/pagos
@@ -50,17 +48,31 @@ func (h *Handler) ListarMisPagos(c *fiber.Ctx) error {
 }
 
 // VerificarPago maneja PUT /api/v1/pagos/:id/verificar (solo admin)
-// Confirma el pago, actualiza el pedido a "confirmado" y dispara gamificación.
+// Confirma el pago y actualiza el pedido a "confirmado".
+// La gamificación se dispara al entregar el pedido.
 func (h *Handler) VerificarPago(c *fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
 		return response.BadRequest(c, "ID de pago inválido")
 	}
 
-	pago, err := h.service.VerificarPago(c.Context(), id, h.gamificacionSvc)
+	pago, err := h.service.VerificarPago(c.Context(), id)
 	if err != nil {
 		return response.BadRequest(c, err.Error())
 	}
 
-	return response.Ok(c, pago, "Pago verificado. Puntos de gamificación acreditados.")
+	return response.Ok(c, pago, "Pago verificado. Pedido confirmado.")
+}
+
+// ListarTodos maneja GET /api/v1/admin/pagos (solo admin)
+func (h *Handler) ListarTodos(c *fiber.Ctx) error {
+	pagina, _ := strconv.Atoi(c.Query("pagina", "1"))
+	limite, _ := strconv.Atoi(c.Query("limite", "50"))
+
+	pagos, err := h.service.ListarTodosPagos(c.Context(), pagina, limite)
+	if err != nil {
+		return response.Internal(c, "Error al listar pagos")
+	}
+
+	return response.Ok(c, pagos, "Pagos obtenidos")
 }

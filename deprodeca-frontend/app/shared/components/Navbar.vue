@@ -3,6 +3,23 @@ const searchQuery = ref("")
 const mobileMenuOpen = ref(false)
 const categoriasOpen = ref(false)
 const cartCount = ref(0)
+const autenticado = ref(false)
+const esAdmin = ref(false)
+
+function verificarAuth() {
+  if (import.meta.client) {
+    const token = localStorage.getItem("deprodeca_token")
+    autenticado.value = !!token
+    if (token) {
+      try {
+        const user = JSON.parse(localStorage.getItem("deprodeca_user") || "{}")
+        esAdmin.value = user.rol === "admin"
+      } catch { esAdmin.value = false }
+    } else {
+      esAdmin.value = false
+    }
+  }
+}
 
 function actualizarCarrito() {
   if (import.meta.client) {
@@ -12,14 +29,17 @@ function actualizarCarrito() {
 }
 
 onMounted(() => {
+  verificarAuth()
   actualizarCarrito()
   window.addEventListener("storage", actualizarCarrito)
   window.addEventListener("carrito-actualizado", actualizarCarrito)
+  window.addEventListener("auth-cambiado", verificarAuth)
 })
 
 onUnmounted(() => {
   window.removeEventListener("storage", actualizarCarrito)
   window.removeEventListener("carrito-actualizado", actualizarCarrito)
+  window.removeEventListener("auth-cambiado", verificarAuth)
 })
 
 const categorias = [
@@ -31,14 +51,54 @@ const categorias = [
   { nombre: "Cuidado Personal", slug: "cuidado-personal", desc: "Shampoo, jabón, desodorante" },
 ]
 
+// ─── Dropdown posicionamiento (Teleport al body) ──────
+const catBtnRef = ref<HTMLElement | null>(null)
+const dropdownStyle = ref<Record<string, string>>({})
+
+function abrirCategorias() {
+  if (!catBtnRef.value) return
+  const rect = catBtnRef.value.getBoundingClientRect()
+  dropdownStyle.value = {
+    position: "fixed",
+    top: `${rect.bottom + 12}px`,
+    left: `${rect.left}px`,
+    width: "540px",
+    zIndex: "100",
+  }
+  categoriasOpen.value = true
+  // Cerrar con clic fuera
+  setTimeout(() => document.addEventListener("click", cerrarCategoriasFuera), 0)
+}
+
+function cerrarCategoriasFuera(e: MouseEvent) {
+  if (catBtnRef.value && !catBtnRef.value.contains(e.target as Node)) {
+    categoriasOpen.value = false
+    document.removeEventListener("click", cerrarCategoriasFuera)
+  }
+}
+
+function closeDropdown() {
+  categoriasOpen.value = false
+  document.removeEventListener("click", cerrarCategoriasFuera)
+}
+
+function cerrarSesion() {
+  if (import.meta.client) {
+    localStorage.removeItem("deprodeca_token")
+    localStorage.removeItem("deprodeca_user")
+    window.dispatchEvent(new Event("auth-cambiado"))
+  }
+  closeDropdown()
+  navigateTo("/")
+}
+
 function buscar() {
   if (searchQuery.value.trim()) {
-    categoriasOpen.value = false
+    closeDropdown()
     navigateTo(`/catalogo?q=${encodeURIComponent(searchQuery.value.trim())}`)
   }
 }
 
-function closeDropdown() { categoriasOpen.value = false }
 </script>
 
 <template>
@@ -54,11 +114,12 @@ function closeDropdown() { categoriasOpen.value = false }
         </NuxtLink>
 
         <!-- Categorías Dropdown (desktop) -->
-        <div class="hidden lg:block relative">
+        <div class="hidden lg:block">
           <button
-            class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-body text-small font-semibold text-texto hover:bg-fondo transition-all duration-300 min-h-[44px]"
+            ref="catBtnRef"
+            class="flex items-center gap-2 px-4 py-2.5 font-body text-small font-semibold text-texto hover:bg-fondo transition-all duration-300 min-h-[44px]"
             :class="categoriasOpen ? 'bg-fondo' : ''"
-            @click="categoriasOpen = !categoriasOpen"
+            @click="categoriasOpen ? closeDropdown() : abrirCategorias()"
           >
             Categorías
             <svg
@@ -66,19 +127,22 @@ function closeDropdown() { categoriasOpen.value = false }
               :class="['transition-transform duration-300', categoriasOpen ? 'rotate-180' : '']"
             ><path d="m6 9 6 6 6-6"/></svg>
           </button>
+        </div>
 
-          <!-- Dropdown panel -->
+        <!-- Dropdown panel (Teleport al body para evitar stacking context del header) -->
+        <Teleport to="body">
           <Transition name="dropdown">
             <div
               v-if="categoriasOpen"
-              class="absolute top-full left-0 mt-3 w-[540px] bg-white rounded-2xl shadow-xl border border-borde p-4 grid grid-cols-2 gap-1 z-dropdown"
+              :style="dropdownStyle"
+              class="bg-white shadow-xl border border-borde p-4 grid grid-cols-2 gap-1"
               @mouseleave="closeDropdown"
             >
               <NuxtLink
                 v-for="cat in categorias"
                 :key="cat.slug"
                 :to="`/catalogo?categoria=${cat.slug}`"
-                class="flex flex-col gap-0.5 px-4 py-3 rounded-xl hover:bg-fondo transition-colors duration-200 group"
+                class="flex flex-col gap-0.5 px-4 py-3 hover:bg-fondo transition-colors duration-200 group"
                 @click="closeDropdown"
               >
                 <span class="font-body text-small font-semibold text-texto group-hover:text-[#D4A017] transition-colors">
@@ -88,7 +152,7 @@ function closeDropdown() { categoriasOpen.value = false }
               </NuxtLink>
             </div>
           </Transition>
-        </div>
+        </Teleport>
 
         <!-- Spacer -->
         <div class="flex-1 hidden md:block" />
@@ -106,14 +170,44 @@ function closeDropdown() { categoriasOpen.value = false }
 
         <!-- Actions -->
         <div class="flex items-center gap-1">
+          <!-- Admin Dashboard (solo admin) -->
+          <NuxtLink
+            v-if="esAdmin"
+            to="/admin/dashboard"
+            class="font-mono text-[10px] uppercase tracking-[0.15em] px-3 py-2.5 border border-[#D4A017] text-[#D4A017] hover:bg-[#D4A017] hover:text-black transition-colors duration-200 min-h-[44px] flex items-center"
+            aria-label="Dashboard Admin"
+            @click="closeDropdown"
+          >
+            ADMIN
+          </NuxtLink>
+
           <NuxtLink to="/carrito" class="relative p-2 rounded-xl hover:bg-fondo transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Carrito" @click="closeDropdown">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 002 1.58h9.78a2 2 0 001.95-1.57l1.65-7.43H5.12"/></svg>
             <span v-if="cartCount > 0" class="absolute -top-0.5 -right-0.5 bg-texto text-white text-[10px] font-display font-bold rounded-full h-5 w-5 flex items-center justify-center">{{ cartCount }}</span>
           </NuxtLink>
 
-          <NuxtLink to="/auth/login" class="p-2 rounded-xl hover:bg-fondo transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Perfil" @click="closeDropdown">
+          <!-- Perfil (condicional: logueado → /perfil, no logueado → /auth/login) -->
+          <NuxtLink
+            :to="autenticado ? '/perfil' : '/auth/login'"
+            class="relative p-2 rounded-xl hover:bg-fondo transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            :aria-label="autenticado ? 'Perfil' : 'Iniciar sesión'"
+            @click="closeDropdown"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <!-- Indicador de sesión activa -->
+            <span v-if="autenticado" class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#D4A017] rounded-full" />
           </NuxtLink>
+
+          <!-- Cerrar Sesión (desktop, solo visible con sesión) -->
+          <button
+            v-if="autenticado"
+            class="hidden sm:flex items-center p-2 hover:bg-error/10 transition-colors duration-300 min-h-[44px] min-w-[44px] justify-center"
+            aria-label="Cerrar sesión"
+            title="Cerrar sesión"
+            @click="cerrarSesion"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
 
           <!-- Hamburger (mobile) -->
           <button class="lg:hidden p-2 rounded-xl hover:bg-fondo transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Menú" @click="mobileMenuOpen = !mobileMenuOpen">
@@ -133,6 +227,18 @@ function closeDropdown() { categoriasOpen.value = false }
               <span class="font-body text-body font-semibold text-texto">{{ cat.nombre }}</span>
               <span class="font-body text-caption text-texto-muted">{{ cat.desc }}</span>
             </NuxtLink>
+
+            <!-- Separador + Cerrar Sesión (mobile) -->
+            <template v-if="autenticado">
+              <div class="border-t border-borde my-2" />
+              <button
+                class="flex items-center gap-3 w-full px-3 py-3 font-mono text-[11px] uppercase tracking-[0.15em] text-error hover:bg-error/10 transition-colors min-h-[44px]"
+                @click="cerrarSesion(); mobileMenuOpen = false"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Cerrar Sesión
+              </button>
+            </template>
           </nav>
         </div>
       </Transition>
