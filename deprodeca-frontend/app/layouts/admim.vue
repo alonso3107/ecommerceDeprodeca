@@ -1,44 +1,125 @@
+<!--
+  ═══════════════════════════════════════════════════════════════
+  admim.vue — Layout Admin · DEPRODECA
+  Brutalismo industrial: sidebar negro con íconos geométricos,
+  contenido con bordes duros. Toolbar técnica superior.
+  ═══════════════════════════════════════════════════════════════
+-->
 <script setup lang="ts">
 // Layout admin — protegido por middleware/admin.ts
+const route = useRoute()
+
+const links = [
+  {
+    to: "/admin/dashboard",
+    label: "Dashboard",
+    icon: "dashboard",
+  },
+  {
+    to: "/admin/productos",
+    label: "Productos",
+    icon: "products",
+  },
+  {
+    to: "/admin/pedidos",
+    label: "Pedidos",
+    icon: "orders",
+  },
+] as const
+
+function isActive(path: string) { return route.path === path }
 </script>
 
 <template>
-  <div class="min-h-screen flex bg-surface">
-    <!-- Sidebar admin -->
-    <aside class="w-64 bg-text-primary text-white p-6 hidden lg:block">
-      <span class="font-display text-display-md text-brand-primary leading-none">
-        DEPRO<span class="text-white">DECA</span>
-      </span>
-      <p class="mt-1 font-body text-caption text-gray-400">Panel de Administración</p>
+  <div class="min-h-screen flex bg-fondo">
 
-      <nav class="mt-8 space-y-2">
-        <NuxtLink
-          to="/admin/dashboard"
-          class="flex items-center gap-2 px-3 py-2.5 rounded-lg font-body text-small text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-          Dashboard
+    <!-- ═══ SIDEBAR · Negro industrial ═══ -->
+    <aside class="w-64 bg-texto text-white hidden lg:flex flex-col flex-shrink-0">
+
+      <!-- Logo -->
+      <div class="px-6 py-8 border-b border-white/10">
+        <NuxtLink to="/" class="inline-block">
+          <span class="font-display text-display-md leading-none tracking-tight">
+            DEPRO<span class="text-[#D4A017]">DECA</span>
+          </span>
         </NuxtLink>
+        <p class="mt-2 font-mono text-[9px] text-white/30 uppercase tracking-[0.2em]">
+          Panel de Administración
+        </p>
+      </div>
+
+      <!-- Navegación -->
+      <nav class="flex-1 py-4">
         <NuxtLink
-          to="/admin/productos"
-          class="flex items-center gap-2 px-3 py-2.5 rounded-lg font-body text-small text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+          v-for="link in links"
+          :key="link.to"
+          :to="link.to"
+          class="flex items-center gap-3 mx-3 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em]
+                 transition-all duration-150"
+          :class="isActive(link.to)
+            ? 'bg-[#D4A017] text-black font-bold'
+            : 'text-white/50 hover:text-white hover:bg-white/5'"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-          Productos
-        </NuxtLink>
-        <NuxtLink
-          to="/admin/pedidos"
-          class="flex items-center gap-2 px-3 py-2.5 rounded-lg font-body text-small text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-          Pedidos
+
+          <!-- Dashboard: Grilla geométrica -->
+          <svg v-if="link.icon === 'dashboard'" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="1" y="1" width="6" height="6" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="9" y="1" width="6" height="6" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="1" y="9" width="6" height="6" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="9" y="9" width="6" height="6" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+
+          <!-- Productos: Caja isométrica -->
+          <svg v-if="link.icon === 'products'" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2L14 5.5V11L8 14.5L2 11V5.5L8 2Z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M2 5.5L8 9L14 5.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 9V14.5" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+
+          <!-- Pedidos: Documento/lista -->
+          <svg v-if="link.icon === 'orders'" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="1" width="10" height="14" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="6" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="6" y1="8" x2="10" y2="8" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="6" y1="11" x2="8" y2="11" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+
+          {{ link.label }}
         </NuxtLink>
       </nav>
+
+      <!-- Footer sidebar -->
+      <div class="px-6 py-4 border-t border-white/10">
+        <NuxtLink
+          to="/"
+          class="font-mono text-[9px] text-white/30 hover:text-[#D4A017] uppercase tracking-[0.2em] transition-colors"
+        >
+          ← Volver a la Tienda
+        </NuxtLink>
+      </div>
     </aside>
 
-    <!-- Contenido admin -->
-    <div class="flex-1 p-6">
-      <slot />
+    <!-- ═══ CONTENIDO ═══ -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- Toolbar superior -->
+      <header class="bg-white border-b border-borde px-6 py-3 flex items-center justify-between">
+        <span class="font-mono text-[10px] text-texto-muted uppercase tracking-[0.2em]">
+          Admin · {{ links.find(l => isActive(l.to))?.label || "DEPRODECA" }}
+        </span>
+
+        <!-- Indicador online -->
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 bg-exito" />
+          <span class="font-mono text-[9px] text-texto-muted uppercase tracking-[0.15em]">Online</span>
+        </div>
+      </header>
+
+      <!-- Contenido de la página -->
+      <main class="flex-1 p-6 md:p-8">
+        <slot />
+      </main>
     </div>
+
   </div>
 </template>
