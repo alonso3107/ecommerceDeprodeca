@@ -1,6 +1,5 @@
 // useFetch — Composable reutilizable para llamadas a la API.
 // Encapsula loading, error y tipado genérico.
-import { ref } from "vue"
 
 export function useFetch<T>() {
   const data = ref<T | null>(null)

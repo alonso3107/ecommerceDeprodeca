@@ -10,6 +10,10 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
   ],
 
+  components: [
+    { path: "~/shared/components", pathPrefix: false },
+  ],
+
   css: ["~/assets/styles/main.css"],
 
   vite: {
@@ -27,6 +31,9 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },
+        { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" },
       ],
     },
   },

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed, useId } from "vue"
 
 const props = withDefaults(
   defineProps<{

@@ -1,193 +1,174 @@
 /* ═══════════════════════════════════════════════════════════
-   DEPRODECA E-COMMERCE — Design System
-   Tailwind CSS v4 @theme + Custom Properties
+   DEPRODECA v2 — Minimalista Premium
+   Fuentes: Big Noodle Titling (Display) + Cinzel Decorative (Body)
+   Paleta: blanco puro, negro suave, acento puntual, aire
    ═══════════════════════════════════════════════════════════ */
 
-/* ─── @font-face: Big Noodle Titling (DISPLAY) ─────────── */
+/* ─── @font-face ─────────────────────────────────────── */
 @font-face {
   font-family: "Big Noodle Titling";
-  src: url("../../bignoodletitling/big_noodle_titling.ttf") format("truetype");
+  src: url("/fonts/big_noodle_titling.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Big Noodle Titling";
-  src: url("../../bignoodletitling/big_noodle_titling_oblique.ttf") format("truetype");
+  src: url("/fonts/big_noodle_titling_oblique.ttf") format("truetype");
   font-weight: 700;
   font-style: oblique;
   font-display: swap;
 }
-
-/* ─── @font-face: Cinzel Decorative (BODY ELEGANTE) ──────── */
 @font-face {
   font-family: "Cinzel Decorative";
-  src: url("../../Cinzel-Decorative/CinzelDecorative-Regular.ttf") format("truetype");
+  src: url("/fonts/CinzelDecorative-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Cinzel Decorative";
-  src: url("../../Cinzel-Decorative/CinzelDecorative-Bold.ttf") format("truetype");
+  src: url("/fonts/CinzelDecorative-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Cinzel Decorative";
-  src: url("../../Cinzel-Decorative/CinzelDecorative-Black.ttf") format("truetype");
+  src: url("/fonts/CinzelDecorative-Black.ttf") format("truetype");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
 
-/* ─── Tailwind CSS v4 @theme ────────────────────────────── */
+/* ─── Tailwind v4 @import ────────────────────────────── */
 @import "tailwindcss";
 
+/* ─── @theme — Minimalista Premium ───────────────────── */
 @theme {
-  /* ── Paleta de colores DEPRODECA ───────────────── */
-  --color-brand-primary: #FFE500;
-  --color-brand-secondary: #0038FF;
-  --color-surface: #F5F5F5;
-  --color-border-base: #E0E0E0;
-  --color-text-primary: #0A0A0A;
-  --color-text-muted: #6B7280;
-  --color-status-error: #FF3B30;
-  --color-status-success: #34C759;
-  --color-status-warning: #FF9500;
+  /* Paleta */
+  --color-fondo: #FAFAFA;
+  --color-superficie: #FFFFFF;
+  --color-texto: #171717;
+  --color-texto-muted: #737373;
+  --color-acento: #171717;
+  --color-borde: #E5E5E5;
+  --color-borde-hover: #A3A3A3;
+  --color-exito: #16A34A;
+  --color-error: #DC2626;
+  --color-advertencia: #F59E0B;
+  --color-brand: #171717;
 
-  /* ── Tipografía ─────────────────────────────────── */
+  /* Aliases para compatibilidad con componentes existentes */
+  --color-brand-primary: var(--color-acento);
+  --color-brand-secondary: var(--color-acento);
+  --color-surface: var(--color-fondo);
+  --color-border-base: var(--color-borde);
+  --color-text-primary: var(--color-texto);
+  --color-text-muted: var(--color-texto-muted);
+  --color-status-success: var(--color-exito);
+  --color-status-error: var(--color-error);
+  --color-status-warning: var(--color-advertencia);
+
+  /* Tipografía */
   --font-display: "Big Noodle Titling", sans-serif;
-  --font-body: "Cinzel Decorative", serif;
+  --font-body: "Montserrat", sans-serif;
+  --font-decorative: "Cinzel Decorative", serif;
 
-  /* ── Escala tipográfica ─────────────────────────── */
-  --text-display-xl: 4.5rem;     /* 72px */
-  --text-display-xl--line-height: 1.1;
+  /* Escala tipográfica — más respiratoria */
+  --text-display-xl: 5rem;
+  --text-display-xl--line-height: 1;
   --text-display-xl--letter-spacing: -0.02em;
   --text-display-xl--font-weight: 700;
 
-  --text-display-lg: 3rem;       /* 48px */
-  --text-display-lg--line-height: 1.15;
+  --text-display-lg: 3.5rem;
+  --text-display-lg--line-height: 1.05;
   --text-display-lg--letter-spacing: -0.01em;
   --text-display-lg--font-weight: 700;
 
-  --text-display-md: 2.25rem;    /* 36px */
-  --text-display-md--line-height: 1.2;
+  --text-display-md: 2.5rem;
+  --text-display-md--line-height: 1.1;
   --text-display-md--font-weight: 700;
 
-  --text-heading: 1.5rem;        /* 24px */
+  --text-heading: 1.5rem;
   --text-heading--line-height: 1.3;
   --text-heading--font-weight: 700;
 
-  --text-subheading: 1.125rem;   /* 18px */
+  --text-subheading: 1.125rem;
   --text-subheading--line-height: 1.4;
   --text-subheading--font-weight: 600;
 
-  --text-body: 1rem;             /* 16px */
+  --text-body: 1rem;
   --text-body--line-height: 1.6;
   --text-body--font-weight: 400;
 
-  --text-small: 0.875rem;        /* 14px */
+  --text-small: 0.875rem;
   --text-small--line-height: 1.5;
   --text-small--font-weight: 400;
 
-  --text-caption: 0.75rem;       /* 12px */
+  --text-caption: 0.75rem;
   --text-caption--line-height: 1.4;
   --text-caption--font-weight: 400;
 
-  /* ── Border radius ──────────────────────────────── */
-  --radius-sm: 0.25rem;   /* 4px */
-  --radius-md: 0.5rem;    /* 8px */
-  --radius-lg: 0.75rem;   /* 12px */
-  --radius-xl: 1rem;      /* 16px */
-  --radius-full: 9999px;
+  /* Border radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
 
-  /* ── Shadows (hovers pacíficos: max shadow-lg) ──── */
-  --shadow-sm: 0 1px 2px rgba(10, 10, 10, 0.06);
-  --shadow-md: 0 4px 6px rgba(10, 10, 10, 0.08);
-  --shadow-lg: 0 10px 25px rgba(10, 10, 10, 0.12);
-  --shadow-brand: 0 4px 14px rgba(255, 229, 0, 0.3);
+  /* Shadows — suaves, premium */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.1);
 
-  /* ── Z-index ────────────────────────────────────── */
+  /* Z-index */
   --z-base: 0;
-  --z-dropdown: 10;
-  --z-sticky: 20;
-  --z-overlay: 40;
-  --z-modal: 100;
+  --z-sticky: 10;
+  --z-dropdown: 50;
+  --z-overlay: 100;
+  --z-modal: 200;
   --z-toast: 1000;
 }
 
-/* ─── Estilos base globales ──────────────────────────────── */
+/* ─── Estilos base ──────────────────────────────────── */
 @layer base {
   html {
     font-family: var(--font-body);
-    color: var(--color-text-primary);
-    background-color: #FFFFFF;
-    scroll-behavior: smooth;
+    color: var(--color-texto);
+    background-color: var(--color-fondo);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
-  /* Focus ring accesible en TODOS los interactivos */
   *:focus-visible {
-    outline: 2px solid var(--color-brand-secondary);
-    outline-offset: 2px;
-  }
-
-  /* Scrollbar sutil */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--color-surface);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #C0C0C0;
+    outline: 2px solid var(--color-acento);
+    outline-offset: 3px;
     border-radius: 4px;
   }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #D4D4D4; border-radius: 3px; }
 }
 
-/* ─── Utilidades de animación (hovers pacíficos) ─────────── */
+/* ─── Utilidades de animación (hovers pacíficos) ─────── */
 @utility hover-lift {
-  transition: transform 500ms ease, box-shadow 500ms ease;
-}
-@utility hover-lift:hover {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: var(--shadow-lg);
-}
-
-@utility hover-glow {
-  transition: box-shadow 500ms ease;
-}
-@utility hover-glow:hover {
-  box-shadow: var(--shadow-brand);
+  transition: transform 600ms ease, box-shadow 600ms ease;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
-/* ─── Transición de entrada de página ────────────────────── */
 @utility page-enter {
-  animation: fadeInUp 500ms ease both;
+  animation: fadeIn 600ms ease both;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ─── Gradientes utilitarios ─────────────────────────────── */
-@utility gradient-brand {
-  background: linear-gradient(135deg, var(--color-brand-primary), #FFD000);
-}
-
-@utility gradient-dark {
-  background: linear-gradient(180deg, #0A0A0A 0%, #1A1A1A 100%);
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
