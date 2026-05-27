@@ -8,7 +8,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: "default" })
 
-const supabase = usarSupabase()
+const supabase = useSupabase()
 
 // ─── Estado del formulario ──────────────────────────────
 const formulario = reactive({
