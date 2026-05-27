@@ -8,6 +8,21 @@
 <script setup lang="ts">
 definePageMeta({ layout: "default" })
 
+const supabase = usarSupabase()
+
+// ─── Estado del formulario ──────────────────────────────
+const formulario = reactive({
+  nombre: "",
+  email: "",
+  telefono: "",
+  motivo: "",
+  mensaje: "",
+})
+
+const enviando = ref(false)
+const enviado = ref(false)
+const error = ref("")
+
 const motivoOptions = [
   "Quiero registrarme como bodega",
   "Consulta sobre pedidos",
@@ -45,6 +60,40 @@ const horarios = [
   { dia: "Sábado", hora: "9:00 — 13:00" },
   { dia: "Domingo", hora: "Cerrado" },
 ] as const
+
+// ─── Enviar formulario a Supabase ─────────────────────
+async function enviarFormulario() {
+  if (enviando.value) return
+  
+  // Validación básica
+  if (!formulario.nombre.trim() || !formulario.email.trim() || !formulario.mensaje.trim()) {
+    error.value = "Completá nombre, email y mensaje como mínimo."
+    return
+  }
+
+  enviando.value = true
+  error.value = ""
+
+  try {
+    const { error: err } = await supabase
+      .from("consultas")
+      .insert({
+        nombre: formulario.nombre.trim(),
+        email: formulario.email.trim(),
+        telefono: formulario.telefono.trim(),
+        motivo: formulario.motivo || "No especificado",
+        mensaje: formulario.mensaje.trim(),
+      })
+
+    if (err) throw err
+
+    enviado.value = true
+  } catch (e: any) {
+    error.value = e.message || "Error al enviar. Intentá de nuevo."
+  } finally {
+    enviando.value = false
+  }
+}
 </script>
 
 <template>
@@ -120,15 +169,31 @@ const horarios = [
               </h2>
             </div>
 
-            <form class="space-y-6" @submit.prevent>
+            <form class="space-y-6" @submit.prevent="enviarFormulario">
               
+              <!-- Mensaje de éxito -->
+              <div v-if="enviado" class="border border-[#D4A017] bg-[#D4A017]/5 p-6">
+                <p class="font-display text-[18px] text-[#D4A017] uppercase tracking-wide mb-2">
+                  ¡Mensaje enviado!
+                </p>
+                <p class="font-body text-[14px] text-[#666666] leading-relaxed">
+                  Gracias por escribirnos. Te respondemos en menos de 24 horas.
+                </p>
+              </div>
+
+              <!-- Mensaje de error -->
+              <div v-if="error" class="border border-[#DC2626] bg-[#DC2626]/5 p-4">
+                <p class="font-mono text-[12px] text-[#DC2626]">{{ error }}</p>
+              </div>
+
               <!-- Fila: Nombre + Email -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block font-mono text-[10px] text-[#666666] uppercase tracking-[0.15em] mb-2">
-                    Nombre completo
+                    Nombre completo *
                   </label>
                   <input
+                    v-model="formulario.nombre"
                     type="text"
                     placeholder="Ej: María López"
                     class="w-full bg-[#FFFFFF] border border-[#D1D1D1] px-4 py-3.5 font-body text-[15px] text-[#171717] placeholder:text-[#BBBBBB] outline-none focus:border-[#D4A017] transition-colors duration-300"
@@ -136,9 +201,10 @@ const horarios = [
                 </div>
                 <div>
                   <label class="block font-mono text-[10px] text-[#666666] uppercase tracking-[0.15em] mb-2">
-                    Email
+                    Email *
                   </label>
                   <input
+                    v-model="formulario.email"
                     type="email"
                     placeholder="maria@bodega.pe"
                     class="w-full bg-[#FFFFFF] border border-[#D1D1D1] px-4 py-3.5 font-body text-[15px] text-[#171717] placeholder:text-[#BBBBBB] outline-none focus:border-[#D4A017] transition-colors duration-300"
@@ -152,6 +218,7 @@ const horarios = [
                   Teléfono (WhatsApp)
                 </label>
                 <input
+                  v-model="formulario.telefono"
                   type="tel"
                   placeholder="+51 900 000 000"
                   class="w-full bg-[#FFFFFF] border border-[#D1D1D1] px-4 py-3.5 font-body text-[15px] text-[#171717] placeholder:text-[#BBBBBB] outline-none focus:border-[#D4A017] transition-colors duration-300"
@@ -164,10 +231,11 @@ const horarios = [
                   Motivo de contacto
                 </label>
                 <select
+                  v-model="formulario.motivo"
                   class="w-full bg-[#FFFFFF] border border-[#D1D1D1] px-4 py-3.5 font-body text-[15px] text-[#171717] outline-none focus:border-[#D4A017] transition-colors duration-300 appearance-none cursor-pointer"
                   style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22%3E%3Cpath d=%22M2 4l4 4 4-4%22 stroke=%22%23171717%22 stroke-width=%222%22 fill=%22none%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 16px center;"
                 >
-                  <option value="" disabled selected>Seleccioná un motivo</option>
+                  <option value="" disabled>Seleccioná un motivo</option>
                   <option v-for="m in motivoOptions" :key="m" :value="m">{{ m }}</option>
                 </select>
               </div>
@@ -175,9 +243,10 @@ const horarios = [
               <!-- Mensaje -->
               <div>
                 <label class="block font-mono text-[10px] text-[#666666] uppercase tracking-[0.15em] mb-2">
-                  Mensaje
+                  Mensaje *
                 </label>
                 <textarea
+                  v-model="formulario.mensaje"
                   rows="5"
                   placeholder="Contanos sobre tu bodega y cómo podemos ayudarte..."
                   class="w-full bg-[#FFFFFF] border border-[#D1D1D1] px-4 py-3.5 font-body text-[15px] text-[#171717] placeholder:text-[#BBBBBB] outline-none focus:border-[#D4A017] transition-colors duration-300 resize-none"
@@ -187,10 +256,15 @@ const horarios = [
               <!-- Botón submit — negro sólido brutalista -->
               <button
                 type="submit"
-                class="w-full bg-[#171717] text-[#FAFAFA] font-display text-[16px] uppercase tracking-[0.08em] py-4 hover:bg-[#D4A017] hover:text-[#171717] transition-all duration-300 active:scale-[0.99] flex items-center justify-center gap-3 group"
+                :disabled="enviando || enviado"
+                class="w-full bg-[#171717] text-[#FAFAFA] font-display text-[16px] uppercase tracking-[0.08em] py-4 hover:bg-[#D4A017] hover:text-[#171717] transition-all duration-300 active:scale-[0.99] flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>Enviar mensaje</span>
-                <span class="group-hover:translate-x-1 transition-transform duration-300">→</span>
+                <span v-if="enviando" class="w-5 h-5 border-2 border-[#FAFAFA] border-t-transparent animate-spin" />
+                <span v-else-if="enviado">Mensaje enviado ✓</span>
+                <template v-else>
+                  <span>Enviar mensaje</span>
+                  <span class="group-hover:translate-x-1 transition-transform duration-300">→</span>
+                </template>
               </button>
 
               <p class="font-mono text-[9px] text-[#AAAAAA] uppercase tracking-[0.1em] text-center">

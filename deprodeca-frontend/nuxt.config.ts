@@ -55,6 +55,10 @@ export default defineNuxtConfig({
     public: {
       apiBase:
         process.env.NUXT_PUBLIC_API_BASE || "http://localhost:8080/api/v1",
+      supabaseUrl:
+        process.env.NUXT_PUBLIC_SUPABASE_URL || "",
+      supabaseAnonKey:
+        process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || "",
     },
   },
 
