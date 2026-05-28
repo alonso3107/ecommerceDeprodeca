@@ -10,6 +10,7 @@ import (
 
 	"deprodeca-backend/config"
 	"deprodeca-backend/internal/auth"
+	"deprodeca-backend/internal/contacto"
 	"deprodeca-backend/internal/gamificacion"
 	"deprodeca-backend/internal/pagos"
 	"deprodeca-backend/internal/pedidos"
@@ -90,6 +91,9 @@ func main() {
 	gamificacionService := gamificacion.NewService(gamificacionRepo)
 	gamificacionWSHub := gamificacion.NewHubWebSocket(gamificacionService, cfg.JWT.Secret)
 	gamificacionHandler := gamificacion.NewHandler(gamificacionService, gamificacionWSHub)
+	contactoRepo := contacto.NewRepository(dbPool)
+	contactoService := contacto.NewService(contactoRepo)
+	contactoHandler := contacto.NewHandler(contactoService)
 
 	// Pedidos
 	pedidosRepo := pedidos.NewRepository(dbPool)
@@ -124,6 +128,7 @@ func main() {
 	usuariosGroup := api.Group("/usuarios", middleware.JWTAuth(cfg.JWT.Secret))
 	usuariosGroup.Get("/perfil", usuariosHandler.Perfil)
 	usuariosGroup.Put("/perfil", usuariosHandler.ActualizarPerfil)
+	api.Post("/contacto", contactoHandler.Crear)
 
 	// ── Categorías (público) ───────────────────────────────
 	api.Get("/categorias", productosHandler.ListarCategorias)
