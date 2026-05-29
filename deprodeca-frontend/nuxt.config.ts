@@ -24,7 +24,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: "DEPRODECA",
+      title: "DEPRODECA — Distribuidora Premium",
       htmlAttrs: { lang: "es" },
       meta: [
         { charset: "utf-8" },
@@ -45,7 +45,7 @@ export default defineNuxtConfig({
         },
         {
           rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap",
+          href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Nunito+Sans:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800;900&display=swap",
         },
       ],
     },
