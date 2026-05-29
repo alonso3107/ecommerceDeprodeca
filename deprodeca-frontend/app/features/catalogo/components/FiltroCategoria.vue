@@ -1,115 +1,88 @@
-<!--
-  ═══════════════════════════════════════════════════════════════
-  FiltroCategoria.vue — Barra de filtros horizontal brutalista
-  Pills toggle con bordes duros. Sin rounded-full, sin sombras.
-  Alto contraste: activo = fondo negro + texto blanco.
-  ═══════════════════════════════════════════════════════════════
--->
+<!-- FiltroCategoria.vue — Flat Design Fresh Gallery -->
 <script setup lang="ts">
-// ─── Props ────────────────────────────────────────────────
 const props = defineProps<{
   categorias: { slug: string; nombre: string }[]
   categoriaActiva: string
   buscando: boolean
   queryTexto: string
+  resultados: number
 }>()
 
-// ─── Emits ────────────────────────────────────────────────
 const emit = defineEmits<{
-  (e: "filtrar", slug: string): void
-  (e: "buscar", query: string): void
+  (e: 'filtrar', slug: string): void
+  (e: 'buscar', query: string): void
 }>()
 
-// ─── Estado ───────────────────────────────────────────────
-const busquedaLocal = ref("")
+const busquedaLocal = ref('')
 
-// ─── Computed ─────────────────────────────────────────────
 const placeholderTexto = computed(() =>
-  props.buscando ? `Resultados: "${props.queryTexto}"` : "Buscar producto..."
+  props.buscando ? `Resultados: "${props.queryTexto}"` : 'Buscar productos...'
 )
 
-// ─── Métodos ──────────────────────────────────────────────
 function ejecutarBusqueda() {
-  emit("buscar", busquedaLocal.value.trim())
+  emit('buscar', busquedaLocal.value.trim())
 }
+
+function limpiarFiltros() {
+  busquedaLocal.value = ''
+  emit('filtrar', '')
+}
+
+// Animación de entrada de los pills
+const pillsVisibles = ref(false)
+onMounted(() => { pillsVisibles.value = true })
 </script>
 
 <template>
-  <!--
-    ═══════════════════════════════════════════════════════════
-    FILTROS · Barra horizontal monolítica.
-    Cada categoría es un bloque rectangular con borde duro.
-    Sin transiciones suaves: el toggle es inmediato y crudo.
-    ═══════════════════════════════════════════════════════════
-  -->
-  <div class="space-y-6">
-
-    <!-- Barra de búsqueda · Input brutalista -->
-    <form class="flex gap-0" @submit.prevent="ejecutarBusqueda">
-      <input
-        v-model="busquedaLocal"
-        type="search"
-        :placeholder="placeholderTexto"
-        class="flex-1 border border-borde px-4 py-3 font-body text-body text-texto
-               placeholder:text-texto-muted bg-white
-               focus:border-[#D4A017] focus:outline-none
-               transition-colors duration-200 min-h-[48px]"
-      />
+  <div class="space-y-6 mb-10">
+    <!-- Pills de categorías -->
+    <div class="flex flex-wrap justify-center gap-2">
       <button
-        type="submit"
-        class="border border-l-0 border-borde bg-texto text-white px-6 py-3
-               font-mono text-[11px] uppercase tracking-[0.15em]
-               hover:bg-[#D4A017] hover:text-black hover:border-[#D4A017]
-               transition-colors duration-200 min-h-[48px]"
-      >
-        Buscar
-      </button>
-    </form>
-
-    <!-- Pills de categorías · Bloques duros -->
-    <div class="flex flex-wrap gap-0">
-      <!-- "Todas" siempre presente -->
-      <button
-        class="border border-borde px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.15em]
-               transition-colors duration-150 min-h-[42px]"
-        :class="!categoriaActiva
-          ? 'bg-texto text-white border-texto font-bold'
-          : 'bg-white text-texto-muted hover:text-texto hover:border-texto/30'"
-        @click="emit('filtrar', '')"
-      >
-        Todas
-      </button>
-
-      <!-- Categorías dinámicas -->
-      <button
-        v-for="cat in categorias"
+        v-for="(cat, i) in [{ slug: '', nombre: 'Todas' }, ...categorias]"
         :key="cat.slug"
-        class="border border-l-0 border-borde px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.15em]
-               transition-colors duration-150 min-h-[42px]"
-        :class="categoriaActiva === cat.slug
-          ? 'bg-texto text-white border-texto font-bold'
-          : 'bg-white text-texto-muted hover:text-texto hover:border-texto/30'"
+        class="font-mono text-[11px] uppercase tracking-[0.1em] px-5 py-2.5 border transition-all duration-300 ease-out"
+        :class="[
+          pillsVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2',
+          categoriaActiva === cat.slug || (!categoriaActiva && cat.slug === '')
+            ? 'bg-[#1C1917] border-[#1C1917] text-[#FAFAF9] font-bold'
+            : 'bg-white border-[#C5BFB5] text-[#5C554D] hover:border-[#1C1917] hover:text-[#1C1917]'
+        ]"
+        :style="{ transitionDelay: `${i * 50}ms` }"
         @click="emit('filtrar', cat.slug)"
       >
         {{ cat.nombre }}
       </button>
     </div>
 
-    <!-- Badge de resultados · Indicador técnico -->
-    <div v-if="buscando || categoriaActiva" class="flex items-center gap-2">
-      <span class="font-mono text-[10px] text-texto-muted uppercase tracking-[0.2em]">
-        Filtro activo:
+    <!-- Barra de búsqueda -->
+    <form class="flex justify-center" @submit.prevent="ejecutarBusqueda">
+      <div class="relative w-full max-w-[400px]">
+        <!-- Icono search geométrico -->
+        <svg class="absolute left-1 top-1/2 -translate-y-1/2 text-[#C5BFB5]" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 10L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+        </svg>
+        <input
+          v-model="busquedaLocal"
+          type="search"
+          :placeholder="placeholderTexto"
+          class="w-full border-b-2 border-[#C5BFB5] bg-transparent pl-8 pr-4 py-3 font-body text-[14px] text-[#1C1917] placeholder:text-[#C5BFB5] focus:border-[#A16207] focus:outline-none transition-colors duration-300"
+        />
+      </div>
+    </form>
+
+    <!-- Info: filtro activo + contador -->
+    <div v-if="buscando || categoriaActiva" class="flex items-center justify-center gap-4">
+      <span class="font-mono text-[10px] text-[#5C554D] uppercase tracking-[0.15em]">
+        Filtro: <strong class="text-[#A16207]">{{ buscando ? `"${queryTexto}"` : categoriaActiva }}</strong>
       </span>
-      <span class="font-mono text-[10px] text-[#D4A017] uppercase tracking-[0.15em] font-bold">
-        {{ buscando ? `"${queryTexto}"` : categoriaActiva }}
-      </span>
-      <button
-        class="font-mono text-[10px] text-texto-muted hover:text-error uppercase tracking-wider ml-2"
-        @click="busquedaLocal = ''; emit('filtrar', '')"
-      >
+      <button class="font-mono text-[10px] text-[#5C554D] hover:text-[#DC2626] uppercase transition-colors duration-200" @click="limpiarFiltros">
         ✕ Limpiar
       </button>
     </div>
 
+    <p class="text-center font-mono text-[11px] text-[#5C554D] uppercase tracking-[0.15em]">
+      {{ resultados }} productos
+    </p>
   </div>
 </template>
