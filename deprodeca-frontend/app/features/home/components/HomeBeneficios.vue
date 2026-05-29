@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useIntersectionObserver, usePreferredReducedMotion, useTransition } from "@vueuse/core"
+
 const beneficios = [
   {
     titulo: "Precios B2B",
@@ -25,10 +27,45 @@ const beneficios = [
     etiqueta: "rangos",
   },
 ] as const
+
+const sectionRef = ref<HTMLElement | null>(null)
+const visible = ref(false)
+const reducedMotion = usePreferredReducedMotion()
+
+const cifraTargets = [30, 500, 48, 4]
+const cifraValores = cifraTargets.map(() => ref(0))
+const cifraTransiciones = cifraValores.map((v) =>
+  useTransition(v, { duration: 1200 }),
+)
+
+useIntersectionObserver(
+  sectionRef,
+  ([entry]) => {
+    if (entry?.isIntersecting && !visible.value) {
+      visible.value = true
+      cifraValores.forEach((valor, index) => {
+        setTimeout(() => {
+          valor.value = cifraTargets[index] || 0
+        }, index * 100)
+      })
+    }
+  },
+  { threshold: 0.15 },
+)
+
+const cifrasMostradas = computed(() => {
+  if (reducedMotion.value === "reduce") return ["-30%", "500+", "48h", "4"]
+  return [
+    `-${Math.round(cifraTransiciones[0]?.value || 0)}%`,
+    `${Math.round(cifraTransiciones[1]?.value || 0)}+`,
+    `${Math.round(cifraTransiciones[2]?.value || 0)}h`,
+    `${Math.round(cifraTransiciones[3]?.value || 0)}`,
+  ]
+})
 </script>
 
 <template>
-  <section class="py-24 md:py-32 bg-[#FAFAF9] border-t border-[#D6D3D1]">
+  <section ref="sectionRef" class="py-24 md:py-32 bg-[#FAFAF9] border-t border-[#D6D3D1]">
     <div class="max-w-[1280px] mx-auto px-6 md:px-8">
       <div class="mb-14 md:mb-16">
         <p class="font-mono text-[11px] uppercase text-[#78716C] tracking-[0.2em] mb-4">01 · Ventajas</p>
@@ -36,8 +73,14 @@ const beneficios = [
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <article v-for="b in beneficios" :key="b.titulo" class="bg-white border border-[#D6D3D1] p-8 hover:border-[#A16207] transition-colors duration-300">
-          <p class="font-display text-[clamp(2.5rem,5vw,3.5rem)] font-bold text-[#A16207] leading-none">{{ b.cifra }}</p>
+        <article
+          v-for="(b, index) in beneficios"
+          :key="b.titulo"
+          class="bg-white border border-[#D6D3D1] p-8 hover:border-[#A16207] transition-colors duration-300"
+          :class="(visible || reducedMotion === 'reduce') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
+          :style="{ transition: 'opacity 500ms ease-out, transform 500ms ease-out', transitionDelay: `${index * 100}ms` }"
+        >
+          <p class="font-display text-[clamp(2.5rem,5vw,3.5rem)] font-bold text-[#A16207] leading-none">{{ cifrasMostradas[index] }}</p>
           <p class="font-mono text-[10px] text-[#78716C] uppercase tracking-[0.15em] mt-2">{{ b.etiqueta }}</p>
           <h3 class="font-body text-[16px] font-bold text-[#1C1917] mt-4">{{ b.titulo }}</h3>
           <p class="font-body text-[14px] text-[#78716C] leading-relaxed mt-2">{{ b.desc }}</p>
