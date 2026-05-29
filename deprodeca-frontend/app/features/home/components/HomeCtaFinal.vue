@@ -30,10 +30,10 @@ useIntersectionObserver(
 </script>
 
 <template>
-  <section ref="sectionRef" class="py-24 md:py-32 bg-[#A16207] border-t border-[#D6D3D1]">
+  <section ref="sectionRef" class="py-24 md:py-32 bg-[#A16207] border-t border-[#C5BFB5]">
     <div class="max-w-[1280px] mx-auto px-6 md:px-8">
       <div class="max-w-[780px] mx-auto text-center">
-        <p class="font-mono text-[11px] text-[#1C1917]/60 uppercase tracking-[0.2em] mb-7" :class="(visible || reducedMotion === 'reduce') ? 'opacity-100' : 'opacity-0'" style="transition: opacity 500ms ease-out; transition-delay: 0ms">Sin costo de inscripcion</p>
+        <p class="font-mono text-[11px] text-[#1C1917]/60 uppercase tracking-[0.2em] mb-7" :class="(visible || reducedMotion === 'reduce') ? 'opacity-100' : 'opacity-0'" style="transition: opacity 500ms ease-out; transition-delay: 0ms">Activa tu canal mayorista</p>
 
         <h2 class="font-display text-[clamp(3rem,8vw,6rem)] font-bold text-[#1C1917] leading-[0.9] mb-6" :class="(visible || reducedMotion === 'reduce') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'" style="transition: opacity 600ms ease-out, transform 600ms ease-out; transition-delay: 150ms">
           Empeza a comprar

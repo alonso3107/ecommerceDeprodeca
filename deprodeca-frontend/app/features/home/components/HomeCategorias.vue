@@ -24,14 +24,14 @@ useIntersectionObserver(
 </script>
 
 <template>
-  <section ref="sectionRef" class="py-24 md:py-32 bg-white border-t border-[#D6D3D1]">
+  <section ref="sectionRef" class="py-24 md:py-32 bg-white border-t border-[#C5BFB5]">
     <div class="max-w-[1280px] mx-auto px-6 md:px-8">
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14 md:mb-16">
         <div>
-          <p class="font-mono text-[11px] uppercase text-[#78716C] tracking-[0.2em] mb-4">02 · Categorias</p>
+          <p class="font-mono text-[11px] uppercase text-[#5C554D] tracking-[0.2em] mb-4">Catalogo por categoria</p>
           <h2 class="font-display text-[clamp(2.5rem,6vw,4rem)] font-bold text-[#1C1917] leading-[0.92]">Explora</h2>
         </div>
-        <NuxtLink to="/catalogo" class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#78716C] hover:text-[#A16207] transition-colors duration-300">
+        <NuxtLink to="/catalogo" class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#5C554D] hover:text-[#A16207] transition-colors duration-300">
           Ver todas ->
         </NuxtLink>
       </div>
@@ -41,7 +41,7 @@ useIntersectionObserver(
           v-for="(cat, index) in categorias"
           :key="cat.slug"
           :to="`/catalogo?categoria=${cat.slug}`"
-          class="bg-[#FAFAF9] border border-[#D6D3D1] p-8 hover:border-[#A16207] transition-colors duration-300"
+          class="bg-[#FAFAF9] border border-[#C5BFB5] p-8 hover:border-[#A16207] transition-colors duration-300"
           :class="(visible || reducedMotion === 'reduce') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'"
           :style="{ transition: 'opacity 450ms ease-out, transform 450ms ease-out', transitionDelay: `${index * 80}ms` }"
         >
@@ -62,7 +62,7 @@ useIntersectionObserver(
           </svg>
 
           <p class="font-body text-[18px] font-bold text-[#1C1917]">{{ cat.nombre }}</p>
-          <p class="font-body text-[14px] text-[#78716C] mt-1">{{ cat.desc }}</p>
+          <p class="font-body text-[14px] text-[#5C554D] mt-1">{{ cat.desc }}</p>
           <p class="font-mono text-[11px] text-[#A16207] mt-4 uppercase tracking-[0.15em]">{{ cat.count }} productos</p>
         </NuxtLink>
       </div>
