@@ -24,7 +24,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: "DEPRODECA — Distribuidora Premium",
+      title: "DEPRODECA",
       htmlAttrs: { lang: "es" },
       meta: [
         { charset: "utf-8" },
@@ -56,9 +56,7 @@ export default defineNuxtConfig({
       apiBase:
         process.env.NUXT_PUBLIC_API_BASE || "http://localhost:8080/api/v1",
       supabaseUrl:
-        process.env.NUXT_PUBLIC_SUPABASE_URL ||
-        process.env.SUPABASE_URL ||
-        "",
+        process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "",
       supabaseAnonKey:
         process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY ||
         process.env.SUPABASE_ANON_KEY ||
