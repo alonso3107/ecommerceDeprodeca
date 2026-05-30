@@ -11,6 +11,7 @@ export default defineNuxtConfig({
     { path: "~/shared/components", pathPrefix: false },
     { path: "~/features/home/components", pathPrefix: false },
     { path: "~/features/catalogo/components", pathPrefix: false },
+    { path: "~/features/contacto/components", pathPrefix: false },
     { path: "~/features/checkout/components", pathPrefix: false },
     { path: "~/features/perfil/components", pathPrefix: false },
     { path: "~/features/gamificacion/components", pathPrefix: false },

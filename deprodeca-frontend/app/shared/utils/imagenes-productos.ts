@@ -1,113 +1,174 @@
-// Imágenes premium verificadas vía Pexels API — Mayo 2026
-// Cada URL carga con HTTP 200. Calidad: ?w=800&q=90
+// Imágenes locales del catálogo.
+
+const asset = (file: string): string => new URL(`../../assets/img/${file}`, import.meta.url).href;
+
+const imagenesPorProducto: Record<string, string> = {
+  "menestra lentejas": asset("menestra-lentejas.jpg"),
+  "leche gloria evap 400g": asset("leche-gloria-evap-400g.jpg"),
+  "leche ideal entera": asset("leche-ideal-entera.jpg"),
+  "leche ideal cremosita": asset("leche-ideal-cremosita.jpg"),
+  "yogu yogu fresa 1l": asset("yogu-yogu-fresa-1l.jpg"),
+  "yogu yogu vainilla 1l": asset("yogu-yogu-vainilla-1l.jpg"),
+  "sublime clasico 30g": asset("sublime-clasico-30g.jpg"),
+  "donofrio six pack 6 und": asset("donofrio-six-pack-6-und.jpg"),
+  "caja sublime x24und": asset("caja-sublime-x24und.jpg"),
+  "triangulo 36g": asset("triangulo-36g.jpg"),
+  "morochas 36g": asset("morochas-36g.jpg"),
+  "princesa 30g": asset("princesa-30g.jpg"),
+  "nescafe tradicion 200g": asset("nescafe-tradicion-200g.jpg"),
+  "nescafe capuccino 10 sobres": asset("nescafe-capuccino-10-sobres.jpg"),
+  "milo listo 200ml": asset("milo-listo-200ml.jpg"),
+  "nestea limon 1.5l": asset("nestea-limon-1-5l.jpg"),
+  "nescafe dolca 170g": asset("nescafe-dolca-170g.jpg"),
+  "milo 400g": asset("milo-400g.jpg"),
+  "maggi cubito gallina": asset("maggicubitogallina.jpg"),
+  "maggi sopa criolla": asset("maggisopacriolla.jpg"),
+  "doña gusta": asset("doñagusta.png"),
+  clorox: asset("lejiaclorox.jpg"),
+  lejia: asset("lejiaclorox.jpg"),
+  limpiador: asset("limpiadormultiusos.jpg"),
+  multiusos: asset("limpiadormultiusos.jpg"),
+  "jabon liquido": asset("jabonliquido.png"),
+  protex: asset("jabonprotex.jpg"),
+  shampoo: asset("shampoosavital.png"),
+  savital: asset("shampoosavital.png"),
+  pepsodent: asset("creampepsodent.png"),
+  desodorante: asset("desodoroantespray.png"),
+  spray: asset("desodoroantespray.png"),
+  bolivar: asset("bolivar.jpg"),
+};
 
 export const imagenesProductos = {
   bebidas: [
-    'https://images.pexels.com/photos/1634074/pexels-photo-1634074.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/28268141/pexels-photo-28268141.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/3651045/pexels-photo-3651045.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/17077385/pexels-photo-17077385.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/5995769/pexels-photo-5995769.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/13871766/pexels-photo-13871766.jpeg?w=800&q=90',
+    asset("doñagusta.png"),
+    asset("maggicubitogallina.jpg"),
+    asset("maggisopacriolla.jpg"),
+    asset("jabonliquido.png"),
+    asset("bolivar.jpg"),
+    asset("shampoosavital.png"),
   ],
   snacks: [
-    'https://images.pexels.com/photos/31323236/pexels-photo-31323236.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/4617834/pexels-photo-4617834.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/6485538/pexels-photo-6485538.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/25098396/pexels-photo-25098396.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/29387144/pexels-photo-29387144.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/37304947/pexels-photo-37304947.jpeg?w=800&q=90',
+    asset("doñagusta.png"),
+    asset("maggicubitogallina.jpg"),
+    asset("maggisopacriolla.jpg"),
+    asset("creampepsodent.png"),
+    asset("jabonprotex.jpg"),
+    asset("desodoroantespray.png"),
   ],
   lacteos: [
-    'https://images.pexels.com/photos/36183642/pexels-photo-36183642.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/7190366/pexels-photo-7190366.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/29463558/pexels-photo-29463558.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/31899745/pexels-photo-31899745.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/35740586/pexels-photo-35740586.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/18258533/pexels-photo-18258533.jpeg?w=800&q=90',
+    asset("creampepsodent.png"),
+    asset("jabonliquido.png"),
+    asset("bolivar.jpg"),
+    asset("limpiadormultiusos.jpg"),
+    asset("lejiaclorox.jpg"),
+    asset("jabonprotex.jpg"),
   ],
   abarrotes: [
-    'https://images.pexels.com/photos/343871/pexels-photo-343871.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/11025882/pexels-photo-11025882.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/20586595/pexels-photo-20586595.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/15597774/pexels-photo-15597774.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/35134317/pexels-photo-35134317.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/7606063/pexels-photo-7606063.jpeg?w=800&q=90',
+    asset("doñagusta.png"),
+    asset("maggicubitogallina.jpg"),
+    asset("maggisopacriolla.jpg"),
+    asset("limpiadormultiusos.jpg"),
+    asset("lejiaclorox.jpg"),
+    asset("bolivar.jpg"),
   ],
   limpieza: [
-    'https://images.pexels.com/photos/12997255/pexels-photo-12997255.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/12997254/pexels-photo-12997254.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/28921817/pexels-photo-28921817.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/34686413/pexels-photo-34686413.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/9230357/pexels-photo-9230357.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/4107271/pexels-photo-4107271.jpeg?w=800&q=90',
+    asset("lejiaclorox.jpg"),
+    asset("limpiadormultiusos.jpg"),
+    asset("jabonliquido.png"),
+    asset("bolivar.jpg"),
+    asset("jabonprotex.jpg"),
+    asset("desodoroantespray.png"),
   ],
-  'cuidado-personal': [
-    'https://images.pexels.com/photos/18066458/pexels-photo-18066458.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/29502137/pexels-photo-29502137.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/3750640/pexels-photo-3750640.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/8842706/pexels-photo-8842706.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/27561830/pexels-photo-27561830.jpeg?w=800&q=90',
-    'https://images.pexels.com/photos/10760874/pexels-photo-10760874.jpeg?w=800&q=90',
+  "cuidado-personal": [
+    asset("shampoosavital.png"),
+    asset("desodoroantespray.png"),
+    asset("jabonprotex.jpg"),
+    asset("creampepsodent.png"),
+    asset("jabonliquido.png"),
+    asset("bolivar.jpg"),
   ],
-} as const
+} as const;
 
 type ProductoComoCatalogo = {
-  id?: number | string
-  slug?: string
-  nombre?: string
-  imagen_url?: string | null
-  categoria_nombre?: string | null
-  categoria_slug?: string | null
-}
+  id?: number | string;
+  slug?: string;
+  nombre?: string;
+  categoria_nombre?: string | null;
+  categoria_slug?: string | null;
+};
 
 const aliasCategorias: Record<string, keyof typeof imagenesProductos> = {
-  bebidas: 'bebidas',
-  bebida: 'bebidas',
-  snacks: 'snacks',
-  snack: 'snacks',
-  lacteos: 'lacteos',
-  lacteo: 'lacteos',
-  abarrotes: 'abarrotes',
-  limpieza: 'limpieza',
-  'cuidado-personal': 'cuidado-personal',
-  'cuidado personal': 'cuidado-personal',
-  cuidado_personal: 'cuidado-personal',
-}
+  bebidas: "bebidas",
+  bebida: "bebidas",
+  snacks: "snacks",
+  snack: "snacks",
+  lacteos: "lacteos",
+  lacteo: "lacteos",
+  abarrotes: "abarrotes",
+  limpieza: "limpieza",
+  "cuidado-personal": "cuidado-personal",
+  "cuidado personal": "cuidado-personal",
+  cuidado_personal: "cuidado-personal",
+};
 
-const imagenesGlobales = Object.values(imagenesProductos).flat()
+const imagenesGlobales = Object.values(imagenesProductos).flat();
 
 function normalizarTexto(valor: string): string {
   return valor
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[.,/\\_\-]+/g, " ")
     .toLowerCase()
-    .trim()
+    .trim();
 }
 
-function obtenerClaveCategoria(producto: ProductoComoCatalogo): keyof typeof imagenesProductos | null {
-  const claves = [producto.categoria_slug || '', producto.categoria_nombre || '']
+function resolverImagenExacta(producto: ProductoComoCatalogo): string | null {
+  const claves = [producto.nombre || "", producto.slug || ""];
   for (const clave of claves) {
-    const normalizada = normalizarTexto(clave)
-    if (normalizada in aliasCategorias) {
-      return aliasCategorias[normalizada]
+    const normalizada = normalizarTexto(clave);
+    if (normalizada in imagenesPorProducto) {
+      return imagenesPorProducto[normalizada];
     }
   }
-  return null
+  return null;
 }
 
-function obtenerIndiceSemilla(producto: ProductoComoCatalogo, indice: number): number {
-  const semilla = `${producto.slug || producto.id || producto.nombre || 'producto'}-${indice}`
-  let hash = 0
-  for (let i = 0; i < semilla.length; i += 1) {
-    hash = (hash * 31 + semilla.charCodeAt(i)) >>> 0
+function obtenerClaveCategoria(
+  producto: ProductoComoCatalogo,
+): keyof typeof imagenesProductos | null {
+  const claves = [
+    producto.categoria_slug || "",
+    producto.categoria_nombre || "",
+  ];
+  for (const clave of claves) {
+    const normalizada = normalizarTexto(clave);
+    if (normalizada in aliasCategorias) {
+      return aliasCategorias[normalizada];
+    }
   }
-  return hash
+  return null;
 }
 
-function crearFallbackUnico(producto: ProductoComoCatalogo, indice: number): string {
-  const nombre = normalizarTexto(producto.nombre || producto.slug || `producto-${indice}`) || `producto-${indice}`
-  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'%3E%3Crect width='800' height='600' fill='%23F5F0E8'/%3E%3Ctext x='48' y='84' fill='%231C1917' font-family='monospace' font-size='24' letter-spacing='2'%3E${encodeURIComponent(nombre.toUpperCase())}%3C/text%3E%3Cpath d='M72 468H728' stroke='%23C5BFB5' stroke-width='2'/%3E%3Cpath d='M562 422L712 272L800 360' stroke='%23A16207' stroke-opacity='.18' stroke-width='10' fill='none'/%3E%3C/svg%3E`
+function obtenerIndiceSemilla(
+  producto: ProductoComoCatalogo,
+  indice: number,
+): number {
+  const semilla = `${producto.slug || producto.id || producto.nombre || "producto"}-${indice}`;
+  let hash = 0;
+  for (let i = 0; i < semilla.length; i += 1) {
+    hash = (hash * 31 + semilla.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function crearFallbackUnico(
+  producto: ProductoComoCatalogo,
+  indice: number,
+): string {
+  const nombre =
+    normalizarTexto(producto.nombre || producto.slug || `producto-${indice}`) ||
+    `producto-${indice}`;
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'%3E%3Crect width='800' height='600' fill='%23F5F0E8'/%3E%3Ctext x='48' y='84' fill='%231C1917' font-family='monospace' font-size='24' letter-spacing='2'%3E${encodeURIComponent(nombre.toUpperCase())}%3C/text%3E%3Cpath d='M72 468H728' stroke='%23C5BFB5' stroke-width='2'/%3E%3Cpath d='M562 422L712 272L800 360' stroke='%23A16207' stroke-opacity='.18' stroke-width='10' fill='none'/%3E%3C/svg%3E`;
 }
 
 export function resolverImagenProducto(
@@ -115,44 +176,32 @@ export function resolverImagenProducto(
   indice: number,
   imagenesUsadas: Set<string>,
 ): string {
-  const imagenBackend = producto.imagen_url?.trim()
-  if (imagenBackend && !imagenesUsadas.has(imagenBackend)) {
-    imagenesUsadas.add(imagenBackend)
-    return imagenBackend
+  const imagenExacta = resolverImagenExacta(producto);
+  if (imagenExacta) {
+    imagenesUsadas.add(imagenExacta);
+    return imagenExacta;
   }
 
-  const claveCategoria = obtenerClaveCategoria(producto)
-  const semilla = obtenerIndiceSemilla(producto, indice)
+  const claveCategoria = obtenerClaveCategoria(producto);
+  const semilla = obtenerIndiceSemilla(producto, indice);
   const candidatos = [
     ...(claveCategoria ? imagenesProductos[claveCategoria] : []),
     ...imagenesGlobales,
-  ]
+  ];
 
   for (let i = 0; i < candidatos.length; i += 1) {
-    const candidato = candidatos[(semilla + i) % candidatos.length]
+    const candidato = candidatos[(semilla + i) % candidatos.length];
     if (!imagenesUsadas.has(candidato)) {
-      imagenesUsadas.add(candidato)
-      return candidato
+      imagenesUsadas.add(candidato);
+      return candidato;
     }
   }
 
-  return crearFallbackUnico(producto, indice)
-}
-
-export function obtenerKeywordImagen(producto: ProductoComoCatalogo): string {
-  const nombre = normalizarTexto(producto.nombre || '')
-  const cat = producto.categoria_nombre || ''
-  // Mapeo simple de palabras comunes a inglés
-  const mapa: Record<string, string> = {
-    leche: 'milk', bebida: 'drink', galleta: 'cookie', chocolate: 'chocolate',
-    arroz: 'rice', aceite: 'oil', azucar: 'sugar', fideos: 'pasta',
-    detergente: 'detergent', jabon: 'soap', shampoo: 'shampoo',
-    cafe: 'coffee', yogurt: 'yogurt', queso: 'cheese', mantequilla: 'butter',
-    pan: 'bread', huevo: 'egg', atun: 'tuna', conserva: 'canned',
+  if (candidatos.length > 0) {
+    const candidato = candidatos[semilla % candidatos.length];
+    imagenesUsadas.add(candidato);
+    return candidato;
   }
-  const palabras = nombre.split(/\s+/)
-  const keywords = palabras
-    .map(p => mapa[normalizarTexto(p)] || p)
-    .filter(p => p.length > 2)
-  return `${keywords.join('+')}+${cat}+product+studio`
+
+  return crearFallbackUnico(producto, indice);
 }
